@@ -1,0 +1,34 @@
+{
+  "risk_level": "safe",
+  "confidence_score": 85,
+  "custom_scoring_criteria": {
+    "behavior_patterns": {
+      "weight": 0.5,
+      "reasoning": "Behavior patterns are critical as they indicate the complexity and potential risk of the transaction. The presence of multiple asset transfers and the complexity of function calls warrant a significant weight."
+    },
+    "gas_efficiency": {
+      "weight": 0.3,
+      "reasoning": "Gas efficiency is important as it reflects the transaction's resource usage. A higher efficiency indicates a well-optimized transaction, which is generally a positive sign."
+    },
+    "ui_js_security": {
+      "weight": 0.2,
+      "reasoning": "While JavaScript security is relevant, the absence of any JavaScript code in this transaction reduces its weight in the overall scoring."
+    }
+  },
+  "explanation": "This transaction involves two asset transfers of Ether between addresses, with no state changes detected. The functions utilized in the transaction appear to be standard and do not exhibit any suspicious behavior.",
+  "recommendations": [
+    "Monitor the transaction for any future interactions that may indicate suspicious behavior.",
+    "Ensure that the involved addresses are not linked to any known malicious activities.",
+    "Continue to analyze similar transactions for patterns that may emerge over time."
+  ],
+  "category_analysis": {
+    "behavior_score": 90,
+    "context_score": 75,
+    "ui_score": 100
+  },
+  "analysis_metadata": {
+    "model": "gpt-4o-mini",
+    "analysis_time_seconds": 4.94,
+    "timestamp": "2025-09-17 17:20:20"
+  }
+}

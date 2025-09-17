@@ -1,0 +1,35 @@
+{
+  "risk_level": "safe",
+  "confidence_score": 88,
+  "custom_scoring_criteria": {
+    "behavior_patterns": {
+      "weight": 0.5,
+      "reasoning": "Behavior patterns are critical as they indicate the complexity and potential risk of the transaction. The presence of multiple asset transfers and the complexity of function calls warrant a significant weight."
+    },
+    "gas_efficiency": {
+      "weight": 0.3,
+      "reasoning": "Gas efficiency is important as it reflects the transaction's resource usage. A higher efficiency indicates a well-optimized transaction, which is generally a positive sign."
+    },
+    "ui_js_security": {
+      "weight": 0.2,
+      "reasoning": "While JavaScript security is relevant, the absence of any JavaScript code in this transaction reduces its weight in the overall scoring."
+    }
+  },
+  "explanation": "The transaction involves the transfer of Ether between two addresses using standard security functions for token transfers. There are no complex call chains or state changes, and the transaction exhibits no suspicious behavior. All models agree on the safety of the transaction, with high confidence levels.",
+  "recommendations": [
+    "Continue monitoring for any unusual patterns in future transactions.",
+    "Maintain best practices for security functions in token transfers."
+  ],
+  "category_analysis": {
+    "behavior_score": 90,
+    "context_score": 78.33,
+    "ui_score": 100
+  },
+  "consensus_metadata": {
+    "consensus_reached": true,
+    "rounds_used": 0,
+    "method": "unanimous_agreement",
+    "primary_model": "gpt-4o-mini",
+    "timestamp": "2025-09-17 17:20:36"
+  }
+}

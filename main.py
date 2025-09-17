@@ -11,6 +11,9 @@ import json
 import time
 import subprocess
 from typing import Dict, Any, List
+from dotenv import load_dotenv, find_dotenv
+
+load_dotenv(find_dotenv(filename=".env", usecwd=True), override=False)
 
 def check_dependencies():
     """Check if required dependencies are installed"""
@@ -302,6 +305,7 @@ def generate_final_report(tx_hash: str, llm_results: Dict[str, Any]) -> Dict[str
         print(f"Risk Level: {final_report['security_assessment']['risk_level']}")
         print(f"Confidence Score: {final_report['security_assessment']['confidence_score']}")
         print(f"Consensus Method: {final_report['security_assessment']['consensus_method']}")
+        print(f"Transaction Description: {final_report['transaction_analysis']['explanation']}")
         
         if final_report['recommendations']:
             print("\nKey Recommendations:")

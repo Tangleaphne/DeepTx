@@ -1,0 +1,285 @@
+
+// Function from 34ebbf85ece492cf3910dbe8b1896f6be0357478 - Unresolved_16bad319 in 34ebbf85ece492cf3910dbe8b1896f6be0357478-decompiled.sol
+function Unresolved_16bad319(address arg0) public view returns (bool) {
+        require(arg0 == (address(arg0)));
+        address var_a = address(arg0);
+        var_b = 0x01;
+        address var_c = !(!bytes1(storage_map_b[var_a] / 0x01));
+        return !(!bytes1(storage_map_b[var_a] / 0x01));
+    }
+}
+
+// Function from 3fc91a3afd70395cd496c647d5a6cc9d4b2b7fad - execute in contracts_base_Dispatcher.sol
+function execute(bytes calldata commands, bytes[] calldata inputs) external payable virtual;
+
+    /// @notice Performs a call to purchase an ERC721, then transfers the ERC721 to a specified recipient
+    /// @param inputs The inputs for the protocol and ERC721 transfer, encoded
+    /// @param protocol The protocol to pass the calldata to
+    /// @return success True on success of the command, false on failure
+    /// @return output The outputs or error messages, if any, from the command
+    function callAndTransfer721(bytes calldata inputs, address protocol)
+        internal
+        returns (bool success, bytes memory output)
+    {
+        // equivalent: abi.decode(inputs, (uint256, bytes, address, address, uint256))
+        (uint256 value, bytes calldata data) = getValueAndData(inputs);
+        address recipient;
+        address token;
+        uint256 id;
+        assembly {
+            // 0x00 and 0x20 offsets are value and data, above
+            recipient := calldataload(add(inputs.offset, 0x40))
+            token := calldataload(add(inputs.offset, 0x60))
+            id := calldataload(add(inputs.offset, 0x80))
+        }
+        (success, output) = protocol.call{value: value}(data);
+        if (success) ERC721(token).safeTransferFrom(address(this), map(recipient), id);
+    }
+
+    /// @notice Performs a call to purchase an ERC1155, then transfers the ERC1155 to a specified recipient
+    /// @param inputs The inputs for the protocol and ERC1155 transfer, encoded
+    /// @param protocol The protocol to pass the calldata to
+    /// @return success True on success of the command, false on failure
+    /// @return output The outputs or error messages, if any, from the command
+    function callAndTransfer1155(bytes calldata inputs, address protocol)
+        internal
+        returns (bool success, bytes memory output)
+    {
+        // equivalent: abi.decode(inputs, (uint256, bytes, address, address, uint256, uint256))
+        (uint256 value, bytes calldata data) = getValueAndData(inputs);
+        address recipient;
+        address token;
+        uint256 id;
+        uint256 amount;
+        assembly {
+            // 0x00 and 0x20 offsets are value and data, above
+            recipient := calldataload(add(inputs.offset, 0x40))
+            token := calldataload(add(inputs.offset, 0x60))
+            id := calldataload(add(inputs.offset, 0x80))
+            amount := calldataload(add(inputs.offset, 0xa0))
+        }
+        (success, output) = protocol.call{value: value}(data);
+        if (success) ERC1155(token).safeTransferFrom(address(this), map(recipient), id, amount, new bytes(0));
+    }
+
+    /// @notice Helper function to extract `value` and `data` parameters from input bytes string
+    /// @dev The helper assumes that `value` is the first parameter, and `data` is the second
+    /// @param inputs The bytes string beginning with value and data parameters
+    /// @return value The 256 bit integer value
+    /// @return data The data bytes string
+    function getValueAndData(bytes calldata inputs) internal pure returns (uint256 value, bytes calldata data) {
+        assembly {
+            value := calldataload(inputs.offset)
+        }
+        data = inputs.toBytes(1);
+    }
+}
+
+// Function Unresolved_022c0d9f not found in 65654d410dc1b30aa6eb180b9c699b076ba9beef
+
+// Function from 65654d410dc1b30aa6eb180b9c699b076ba9beef - getReserves in 65654d410dc1b30aa6eb180b9c699b076ba9beef.sol
+function getReserves() external view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast);
+    function price0CumulativeLast() external view returns (uint);
+    function price1CumulativeLast() external view returns (uint);
+    function kLast() external view returns (uint);
+
+    function mint(address to) external returns (uint liquidity);
+    function burn(address to) external returns (uint amount0, uint amount1);
+    function swap(uint amount0Out, uint amount1Out, address to, bytes calldata data) external;
+    function skim(address to) external;
+    function sync() external;
+
+    function initialize(address, address) external;
+}
+
+// File: contracts/interfaces/IUniswapV2ERC20.sol
+
+pragma solidity >=0.5.0;
+
+interface IUniswapV2ERC20 {
+    event Approval(address indexed owner, address indexed spender, uint value);
+    event Transfer(address indexed from, address indexed to, uint value);
+
+    function name() external pure returns (string memory);
+    function symbol() external pure returns (string memory);
+    function decimals() external pure returns (uint8);
+    function totalSupply() external view returns (uint);
+    function balanceOf(address owner) external view returns (uint);
+    function allowance(address owner, address spender) external view returns (uint);
+
+    function approve(address spender, uint value) external returns (bool);
+    function transfer(address to, uint value) external returns (bool);
+    function transferFrom(address from, address to, uint value) external returns (bool);
+
+    function DOMAIN_SEPARATOR() external view returns (bytes32);
+    function PERMIT_TYPEHASH() external pure returns (bytes32);
+    function nonces(address owner) external view returns (uint);
+
+    function permit(address owner, address spender, uint value, uint deadline, uint8 v, bytes32 r, bytes32 s) external;
+}
+
+// Function from 7287d4571b9e0e461107619219d4c20e7a4cbf90 - balanceOf in contracts_WOAH.sol
+function balanceOf(address account) external view returns (uint256);
+
+    /**
+     * @dev Moves a `value` amount of tokens from the caller's account to `to`.
+     *
+     * Returns a boolean value indicating whether the operation succeeded.
+     *
+     * Emits a {Transfer} event.
+     */
+    function transfer(address to, uint256 value) external returns (bool);
+
+    /**
+     * @dev Returns the remaining number of tokens that `spender` will be
+     * allowed to spend on behalf of `owner` through {transferFrom}. This is
+     * zero by default.
+     *
+     * This value changes when {approve} or {transferFrom} are called.
+     */
+    function allowance(address owner, address spender) external view returns (uint256);
+
+    /**
+     * @dev Sets a `value` amount of tokens as the allowance of `spender` over the
+     * caller's tokens.
+     *
+     * Returns a boolean value indicating whether the operation succeeded.
+     *
+     * IMPORTANT: Beware that changing an allowance with this method brings the risk
+     * that someone may use both the old and the new allowance by unfortunate
+     * transaction ordering. One possible solution to mitigate this race
+     * condition is to first reduce the spender's allowance to 0 and set the
+     * desired value afterwards:
+     * https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
+     *
+     * Emits an {Approval} event.
+     */
+    function approve(address spender, uint256 value) external returns (bool);
+
+    /**
+     * @dev Moves a `value` amount of tokens from `from` to `to` using the
+     * allowance mechanism. `value` is then deducted from the caller's
+     * allowance.
+     *
+     * Returns a boolean value indicating whether the operation succeeded.
+     *
+     * Emits a {Transfer} event.
+     */
+    function transferFrom(address from, address to, uint256 value) external returns (bool);
+}
+
+// Function from 7287d4571b9e0e461107619219d4c20e7a4cbf90 - transfer in contracts_WOAH.sol
+function transfer(address to, uint256 value) external returns (bool);
+
+    /**
+     * @dev Returns the remaining number of tokens that `spender` will be
+     * allowed to spend on behalf of `owner` through {transferFrom}. This is
+     * zero by default.
+     *
+     * This value changes when {approve} or {transferFrom} are called.
+     */
+    function allowance(address owner, address spender) external view returns (uint256);
+
+    /**
+     * @dev Sets a `value` amount of tokens as the allowance of `spender` over the
+     * caller's tokens.
+     *
+     * Returns a boolean value indicating whether the operation succeeded.
+     *
+     * IMPORTANT: Beware that changing an allowance with this method brings the risk
+     * that someone may use both the old and the new allowance by unfortunate
+     * transaction ordering. One possible solution to mitigate this race
+     * condition is to first reduce the spender's allowance to 0 and set the
+     * desired value afterwards:
+     * https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
+     *
+     * Emits an {Approval} event.
+     */
+    function approve(address spender, uint256 value) external returns (bool);
+
+    /**
+     * @dev Moves a `value` amount of tokens from `from` to `to` using the
+     * allowance mechanism. `value` is then deducted from the caller's
+     * allowance.
+     *
+     * Returns a boolean value indicating whether the operation succeeded.
+     *
+     * Emits a {Transfer} event.
+     */
+    function transferFrom(address from, address to, uint256 value) external returns (bool);
+}
+
+// Function swap not found in af343cd2b131e0532264e0d4872c52f874523117
+
+// Function balanceOf not found in c02aaa39b223fe8d0a0e5c4f27ead9083c756cc2
+
+// Function from c02aaa39b223fe8d0a0e5c4f27ead9083c756cc2 - deposit in c02aaa39b223fe8d0a0e5c4f27ead9083c756cc2.sol
+function deposit() public payable {
+        balanceOf[msg.sender] += msg.value;
+        Deposit(msg.sender, msg.value);
+    }
+    function withdraw(uint wad) public {
+        require(balanceOf[msg.sender] >= wad);
+        balanceOf[msg.sender] -= wad;
+        msg.sender.transfer(wad);
+        Withdrawal(msg.sender, wad);
+    }
+
+    function totalSupply() public view returns (uint) {
+        return this.balance;
+    }
+
+    function approve(address guy, uint wad) public returns (bool) {
+        allowance[msg.sender][guy] = wad;
+        Approval(msg.sender, guy, wad);
+        return true;
+    }
+
+    function transfer(address dst, uint wad) public returns (bool) {
+        return transferFrom(msg.sender, dst, wad);
+    }
+
+    function transferFrom(address src, address dst, uint wad)
+        public
+        returns (bool)
+    {
+        require(balanceOf[src] >= wad);
+
+        if (src != msg.sender && allowance[src][msg.sender] != uint(-1)) {
+            require(allowance[src][msg.sender] >= wad);
+            allowance[src][msg.sender] -= wad;
+        }
+
+        balanceOf[src] -= wad;
+        balanceOf[dst] += wad;
+
+        Transfer(src, dst, wad);
+
+        return true;
+    }
+}
+
+// Function from c02aaa39b223fe8d0a0e5c4f27ead9083c756cc2 - transfer in c02aaa39b223fe8d0a0e5c4f27ead9083c756cc2.sol
+function transfer(address dst, uint wad) public returns (bool) {
+        return transferFrom(msg.sender, dst, wad);
+    }
+
+    function transferFrom(address src, address dst, uint wad)
+        public
+        returns (bool)
+    {
+        require(balanceOf[src] >= wad);
+
+        if (src != msg.sender && allowance[src][msg.sender] != uint(-1)) {
+            require(allowance[src][msg.sender] >= wad);
+            allowance[src][msg.sender] -= wad;
+        }
+
+        balanceOf[src] -= wad;
+        balanceOf[dst] += wad;
+
+        Transfer(src, dst, wad);
+
+        return true;
+    }
+}

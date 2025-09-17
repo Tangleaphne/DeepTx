@@ -21,14 +21,21 @@ git clone <repository-url>
 cd work
 ```
 
-2. Install dependencies:
+2. Install dependencies:      
 ```bash
+# 1) Ensure that Rust & Cargo are installed:
+curl https://sh.rustup.rs -sSf | sh
+# 2) Install Heimdall's update and installation manager, `bifrost`
+curl -L http://get.heimdall.rs | bash
+# 3) Install Heimdall using `bifrost` from a new terminal
+bifrost
+# 4) Then install Python dependencies
 pip install -r requirements.txt
 ```
 
 3. Set up environment variables (required):
 ```bash
-export HEIMDALL_API_KEY="your_heimdall_api_key"
+export Transpose_Api_Key="your_heimdall_api_key" # Optional, https://docs.transpose.io/quickstart/
 export RPC_URL="your_ethereum_rpc_url"
 export ETHERSCAN_API_KEY="your_etherscan_api_key"
 export OPENAI_API_KEY="your_openai_api_key"

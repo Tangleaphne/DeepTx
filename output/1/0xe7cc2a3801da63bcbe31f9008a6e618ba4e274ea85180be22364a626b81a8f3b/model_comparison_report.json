@@ -1,0 +1,139 @@
+{
+  "transaction_info": {
+    "directory": "output/1/0xe7cc2a3801da63bcbe31f9008a6e618ba4e274ea85180be22364a626b81a8f3b",
+    "analysis_timestamp": "2025-09-17 17:20:28",
+    "models_tested": [
+      "gpt-4o-mini",
+      "gpt-3.5-turbo",
+      "gpt-4o"
+    ]
+  },
+  "model_results": {
+    "gpt-4o-mini": {
+      "status": "success",
+      "risk_level": "safe",
+      "confidence_score": 85,
+      "explanation": "This transaction involves two asset transfers of Ether between addresses, with no state changes detected. The functions utilized in the transaction appear to be standard and do not exhibit any suspicious behavior.",
+      "custom_scoring_criteria": {
+        "behavior_patterns": {
+          "weight": 0.5,
+          "reasoning": "Behavior patterns are critical as they indicate the complexity and potential risk of the transaction. The presence of multiple asset transfers and the complexity of function calls warrant a significant weight."
+        },
+        "gas_efficiency": {
+          "weight": 0.3,
+          "reasoning": "Gas efficiency is important as it reflects the transaction's resource usage. A higher efficiency indicates a well-optimized transaction, which is generally a positive sign."
+        },
+        "ui_js_security": {
+          "weight": 0.2,
+          "reasoning": "While JavaScript security is relevant, the absence of any JavaScript code in this transaction reduces its weight in the overall scoring."
+        }
+      },
+      "recommendations": [
+        "Monitor the transaction for any future interactions that may indicate suspicious behavior.",
+        "Ensure that the involved addresses are not linked to any known malicious activities.",
+        "Continue to analyze similar transactions for patterns that may emerge over time."
+      ],
+      "category_analysis": {
+        "behavior_score": 90,
+        "context_score": 75,
+        "ui_score": 100
+      },
+      "analysis_time": 4.94
+    },
+    "gpt-3.5-turbo": {
+      "status": "success",
+      "risk_level": "safe",
+      "confidence_score": 95,
+      "explanation": "The transaction involves transferring Ether between two addresses with security functions for token transfers. Gas usage is relatively efficient, and there are no suspicious JavaScript codes.",
+      "custom_scoring_criteria": {
+        "behavior_patterns_weight": 0.6,
+        "gas_efficiency_weight": 0.3,
+        "ui_security_weight": 0.1,
+        "reasoning": {
+          "behavior_patterns": "Given the complexity of function calls and asset movements, it holds the highest weight.",
+          "gas_efficiency": "Gas usage is important but not as critical as behavior patterns.",
+          "ui_security": "UI/JavaScript security is least critical in this analysis."
+        }
+      },
+      "recommendations": [
+        "Continue monitoring for any changes in behavior patterns or gas usage efficiency.",
+        "Regularly review security functions for any updates or vulnerabilities."
+      ],
+      "category_analysis": {
+        "behavior_score": 90,
+        "context_score": 85,
+        "ui_score": 100
+      },
+      "analysis_time": 2.98
+    },
+    "gpt-4o": {
+      "status": "success",
+      "risk_level": "safe",
+      "confidence_score": 85,
+      "explanation": "This transaction involves the transfer of Ether between two addresses with no complex call chains or state changes. The functions involved are standard security functions for token transfers and do not exhibit any suspicious behavior.",
+      "custom_scoring_criteria": {
+        "behavior_patterns": 0.4,
+        "gas_efficiency_and_usage_patterns": 0.4,
+        "ui_javascript_security_indicators": 0.2
+      },
+      "recommendations": [
+        "Monitor the addresses involved for any unusual activity in the future.",
+        "Ensure that the smart contract code is audited regularly to maintain security.",
+        "Consider optimizing gas usage for better efficiency in future transactions."
+      ],
+      "category_analysis": {
+        "behavior_score": 90,
+        "context_score": 75,
+        "ui_score": 100
+      },
+      "analysis_time": 4.74
+    }
+  },
+  "consensus_analysis": {
+    "risk_level_consensus": "safe",
+    "average_confidence": 88.33,
+    "confidence_range": "85-95",
+    "models_agreed": true
+  },
+  "performance_metrics": {
+    "fastest_model": "gpt-3.5-turbo",
+    "slowest_model": "gpt-4o-mini",
+    "average_time": 4.22,
+    "total_analysis_time": 12.66
+  },
+  "consensus_result": {
+    "risk_level": "safe",
+    "confidence_score": 88,
+    "custom_scoring_criteria": {
+      "behavior_patterns": {
+        "weight": 0.5,
+        "reasoning": "Behavior patterns are critical as they indicate the complexity and potential risk of the transaction. The presence of multiple asset transfers and the complexity of function calls warrant a significant weight."
+      },
+      "gas_efficiency": {
+        "weight": 0.3,
+        "reasoning": "Gas efficiency is important as it reflects the transaction's resource usage. A higher efficiency indicates a well-optimized transaction, which is generally a positive sign."
+      },
+      "ui_js_security": {
+        "weight": 0.2,
+        "reasoning": "While JavaScript security is relevant, the absence of any JavaScript code in this transaction reduces its weight in the overall scoring."
+      }
+    },
+    "explanation": "The transaction involves the transfer of Ether between two addresses using standard security functions for token transfers. There are no complex call chains or state changes, and the transaction exhibits no suspicious behavior. All models agree on the safety of the transaction, with high confidence levels.",
+    "recommendations": [
+      "Continue monitoring for any unusual patterns in future transactions.",
+      "Maintain best practices for security functions in token transfers."
+    ],
+    "category_analysis": {
+      "behavior_score": 90,
+      "context_score": 78.33,
+      "ui_score": 100
+    },
+    "consensus_metadata": {
+      "consensus_reached": true,
+      "rounds_used": 0,
+      "method": "unanimous_agreement",
+      "primary_model": "gpt-4o-mini",
+      "timestamp": "2025-09-17 17:20:36"
+    }
+  }
+}

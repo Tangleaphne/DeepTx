@@ -1,0 +1,33 @@
+{
+  "transaction_info": {
+    "tx_hash": "0xff8e9226091d513fc936ecc670030eba03f34dbe60cd012122bd18be44248d32",
+    "transaction_type": "Smart Contract Interaction",
+    "analysis_timestamp": "2025-09-17 17:41:03"
+  },
+  "security_assessment": {
+    "risk_level": "safe",
+    "confidence_score": 88,
+    "consensus_method": "unanimous_agreement"
+  },
+  "transaction_analysis": {
+    "explanation": "The transaction involves transferring Ether between two addresses using standard ERC20 token transfer functions. There are no state changes or complex call chains involved, and gas usage is efficient. All models indicate no suspicious behaviors or malicious indicators detected.",
+    "scoring_criteria": {
+      "behavior_patterns": {
+        "weight": 0.43,
+        "reasoning": "The transaction involves standard asset transfers with no suspicious function calls or complex call chains. Asset movements are typical and do not indicate any abnormal behavior."
+      },
+      "gas_efficiency": {
+        "weight": 0.43,
+        "reasoning": "Gas usage is relatively efficient given the number of calls, with no indications of excessive or wasteful gas consumption."
+      },
+      "ui_js_security": {
+        "weight": 0.14,
+        "reasoning": "No JavaScript code is present, reducing the risk of UI-based vulnerabilities."
+      }
+    }
+  },
+  "recommendations": [
+    "Continue monitoring for any unusual patterns in future transactions.",
+    "Maintain best practices for security, including regular audits of smart contracts."
+  ]
+}

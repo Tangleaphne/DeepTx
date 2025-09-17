@@ -1,0 +1,143 @@
+{
+  "transaction_info": {
+    "directory": "output/1/0xff8e9226091d513fc936ecc670030eba03f34dbe60cd012122bd18be44248d32",
+    "analysis_timestamp": "2025-09-17 17:40:59",
+    "models_tested": [
+      "gpt-4o-mini",
+      "gpt-3.5-turbo",
+      "gpt-4o"
+    ]
+  },
+  "model_results": {
+    "gpt-4o-mini": {
+      "status": "success",
+      "risk_level": "safe",
+      "confidence_score": 85,
+      "explanation": "This transaction involves two asset transfers of Ether between addresses, with no state changes or abnormal behavior detected in the code. The functions used are standard for token transfers, indicating normal operation.",
+      "custom_scoring_criteria": {
+        "behavior_patterns": {
+          "weight": 0.5,
+          "reasoning": "The behavior patterns show normal function calls and asset transfers without any suspicious activity."
+        },
+        "gas_efficiency": {
+          "weight": 0.3,
+          "reasoning": "Gas usage is relatively low compared to the total allocated gas, indicating efficient execution."
+        },
+        "ui_js_security": {
+          "weight": 0.2,
+          "reasoning": "No JavaScript code was present, and the absence of suspicious URLs contributes to a higher confidence in security."
+        }
+      },
+      "recommendations": [
+        "Continue monitoring for any future transactions involving these addresses.",
+        "Ensure that the receiving addresses are verified and trusted.",
+        "Maintain regular audits of smart contracts for any potential vulnerabilities."
+      ],
+      "category_analysis": {
+        "behavior_score": 90,
+        "context_score": 80,
+        "ui_score": 100
+      },
+      "analysis_time": 9.22
+    },
+    "gpt-3.5-turbo": {
+      "status": "success",
+      "risk_level": "safe",
+      "confidence_score": 95,
+      "explanation": "The transaction involves transferring Ether between two addresses using standard ERC20 token transfer functions. Gas usage is relatively efficient, and there are no suspicious behaviors or malicious indicators detected.",
+      "custom_scoring_criteria": {
+        "behavior_patterns_weight": 0.4,
+        "gas_efficiency_weight": 0.4,
+        "ui_security_weight": 0.2,
+        "reasoning": "Given the transaction involves standard token transfers with no suspicious functions or abnormal asset movements, behavior patterns and gas efficiency are weighted equally. UI security is given a lower weight due to the absence of JavaScript code."
+      },
+      "recommendations": [
+        "Continue monitoring for any future transactions involving the same addresses for patterns of concern."
+      ],
+      "category_analysis": {
+        "behavior_score": 90,
+        "context_score": 95,
+        "ui_score": 100
+      },
+      "analysis_time": 3.01
+    },
+    "gpt-4o": {
+      "status": "success",
+      "risk_level": "safe",
+      "confidence_score": 85,
+      "explanation": "This transaction involves the transfer of Ether between two addresses. The functions used are standard ERC-20 functions for transferring tokens, and there are no state changes or complex call chains involved.",
+      "custom_scoring_criteria": {
+        "behavior_patterns": {
+          "weight": 0.4,
+          "reasoning": "The transaction involves standard asset transfers with no suspicious function calls or complex call chains. Asset movements are typical and do not indicate any abnormal behavior."
+        },
+        "gas_efficiency_and_usage_patterns": {
+          "weight": 0.4,
+          "reasoning": "Gas usage is relatively efficient given the number of calls, and there are no indications of excessive or wasteful gas consumption."
+        },
+        "ui_javascript_security_indicators": {
+          "weight": 0.2,
+          "reasoning": "No JavaScript code is present, reducing the risk of UI-based vulnerabilities. This category is given less weight due to the absence of UI analysis."
+        }
+      },
+      "recommendations": [
+        "Monitor future transactions for any changes in behavior patterns.",
+        "Ensure that the addresses involved are not flagged in future security databases.",
+        "Consider implementing additional security measures if asset transfer amounts increase significantly."
+      ],
+      "category_analysis": {
+        "behavior_score": 90,
+        "context_score": 80,
+        "ui_score": 85
+      },
+      "analysis_time": 4.42
+    }
+  },
+  "consensus_analysis": {
+    "risk_level_consensus": "safe",
+    "average_confidence": 88.33,
+    "confidence_range": "85-95",
+    "models_agreed": true
+  },
+  "performance_metrics": {
+    "fastest_model": "gpt-3.5-turbo",
+    "slowest_model": "gpt-4o-mini",
+    "average_time": 5.55,
+    "total_analysis_time": 16.65
+  },
+  "consensus_result": {
+    "risk_level": "safe",
+    "confidence_score": 88,
+    "custom_scoring_criteria": {
+      "behavior_patterns": {
+        "weight": 0.43,
+        "reasoning": "The transaction involves standard asset transfers with no suspicious function calls or complex call chains. Asset movements are typical and do not indicate any abnormal behavior."
+      },
+      "gas_efficiency": {
+        "weight": 0.43,
+        "reasoning": "Gas usage is relatively efficient given the number of calls, with no indications of excessive or wasteful gas consumption."
+      },
+      "ui_js_security": {
+        "weight": 0.14,
+        "reasoning": "No JavaScript code is present, reducing the risk of UI-based vulnerabilities."
+      }
+    },
+    "explanation": "The transaction involves transferring Ether between two addresses using standard ERC20 token transfer functions. There are no state changes or complex call chains involved, and gas usage is efficient. All models indicate no suspicious behaviors or malicious indicators detected.",
+    "recommendations": [
+      "Continue monitoring for any unusual patterns in future transactions.",
+      "Maintain best practices for security, including regular audits of smart contracts."
+    ],
+    "category_analysis": {
+      "behavior_score": 90,
+      "context_score": 85,
+      "ui_score": 95
+    },
+    "consensus_metadata": {
+      "consensus_reached": true,
+      "rounds_used": 0,
+      "method": "unanimous_agreement",
+      "primary_model": "gpt-4o-mini",
+      "timestamp": "2025-09-17 17:41:02"
+    }
+  }
+}

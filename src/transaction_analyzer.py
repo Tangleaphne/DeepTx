@@ -30,8 +30,9 @@ def run_transaction_analysis(tx_hash):
     OUTPUT_CODE_PATH = os.path.join(TRACE_DIR, "code.txt")
     ASSET_FLOWS_PATH = os.path.join(TRACE_DIR, "asset_flows.csv")
     GAS_USAGE_PATH = os.path.join(TRACE_DIR, "gas_usage.csv")
-    STATE_CHANGES_PATH = os.path.join(TRACE_DIR, "state_changes.csv")
+    STATE_CHANGES_PATH = os.path.join(TRACE_DIR, "state_changes.csv") #?
 
+    # api_key = os.environ.get("HEIMDALL_API_KEY")
     api_key = os.environ.get("HEIMDALL_API_KEY")
     if not api_key:
         raise ValueError("HEIMDALL_API_KEY environment variable is required")
@@ -87,7 +88,6 @@ def run_transaction_analysis(tx_hash):
     for addr in sorted(involved_addresses):
         try:
             tool.run(addr)
-            time.sleep(1.5)
         except Exception as e:
             print(f"Failed to process {addr}: {e}")
 
