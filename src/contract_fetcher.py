@@ -39,8 +39,6 @@ class ContractFetcher:
                 retry_result = retry.json().get("result", [])
                 if retry_result and retry_result[0].get("SourceCode"):
                     return retry_result[0]
-            # if result and result[0]["SourceCode"]:
-            #     return result[0]
         return None
 
     def fetch_contract_bytecode(self, contract_address):
