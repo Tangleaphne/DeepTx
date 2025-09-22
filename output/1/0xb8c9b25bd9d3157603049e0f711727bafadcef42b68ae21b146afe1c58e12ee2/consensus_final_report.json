@@ -1,0 +1,26 @@
+{
+  "risk_level": "safe",
+  "confidence_score": 88,
+  "custom_scoring_criteria": {
+    "behavior_patterns_weight": 0.45,
+    "gas_efficiency_weight": 0.35,
+    "ui_security_weight": 0.2
+  },
+  "explanation": "The transaction involves standard token transfer functions (transfer, transferFrom, approve) commonly used in ERC20 token contracts. There are no asset transfers or state changes detected, and the gas usage is efficient. All models agree on the absence of suspicious behavior, leading to a consensus on the safety of the transaction.",
+  "recommendations": [
+    "Continue monitoring for any changes in transaction patterns.",
+    "Maintain best practices for smart contract development to ensure ongoing security."
+  ],
+  "category_analysis": {
+    "behavior_score": 87,
+    "context_score": 80,
+    "ui_score": 95
+  },
+  "consensus_metadata": {
+    "consensus_reached": true,
+    "rounds_used": 0,
+    "method": "unanimous_agreement",
+    "primary_model": "gpt-4o-mini",
+    "timestamp": "2025-09-19 18:52:41"
+  }
+}

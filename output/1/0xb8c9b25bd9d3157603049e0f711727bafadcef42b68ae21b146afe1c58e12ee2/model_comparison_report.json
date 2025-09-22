@@ -1,0 +1,126 @@
+{
+  "transaction_info": {
+    "directory": "output/1/0xb8c9b25bd9d3157603049e0f711727bafadcef42b68ae21b146afe1c58e12ee2",
+    "analysis_timestamp": "2025-09-19 18:52:39",
+    "models_tested": [
+      "gpt-4o-mini",
+      "gpt-3.5-turbo",
+      "gpt-4o"
+    ]
+  },
+  "model_results": {
+    "gpt-4o-mini": {
+      "status": "success",
+      "risk_level": "safe",
+      "confidence_score": 85,
+      "explanation": "This transaction involves the execution of standard token transfer functions without any asset transfers or state changes. The code appears to be normal and does not exhibit any suspicious patterns.",
+      "custom_scoring_criteria": {
+        "behavior_patterns": {
+          "weight": 0.5,
+          "reasoning": "Behavior patterns are critical in assessing the complexity and potential risks associated with function calls and asset movements. Given that there are no suspicious functions or asset transfers, this category is weighted heavily."
+        },
+        "gas_efficiency": {
+          "weight": 0.3,
+          "reasoning": "Gas efficiency provides insight into the transaction's resource usage. The transaction shows a reasonable gas efficiency percentage, indicating it is not overly complex or wasteful."
+        },
+        "ui_js_security": {
+          "weight": 0.2,
+          "reasoning": "While JavaScript security indicators are important, the absence of any JavaScript code in this transaction reduces the weight of this category."
+        }
+      },
+      "recommendations": [
+        "Continue monitoring for any future transactions from this address.",
+        "Ensure that all involved addresses are verified and trusted.",
+        "Maintain regular audits of smart contracts for any potential vulnerabilities."
+      ],
+      "category_analysis": {
+        "behavior_score": 90,
+        "context_score": 70,
+        "ui_score": 100
+      },
+      "analysis_time": 4.8
+    },
+    "gpt-3.5-turbo": {
+      "status": "success",
+      "risk_level": "safe",
+      "confidence_score": 95,
+      "explanation": "The transaction involves standard token transfer functions with no asset transfers or state changes. Gas usage is relatively efficient.",
+      "custom_scoring_criteria": {
+        "behavior_patterns_weight": 0.4,
+        "gas_efficiency_weight": 0.4,
+        "ui_security_weight": 0.2,
+        "reasoning": "Given the absence of suspicious behavior, the focus is on gas efficiency and behavior patterns for this transaction."
+      },
+      "recommendations": [
+        "Continue monitoring for any future transactions that may exhibit abnormal behavior."
+      ],
+      "category_analysis": {
+        "behavior_score": 80,
+        "context_score": 90,
+        "ui_score": 100
+      },
+      "analysis_time": 2.9
+    },
+    "gpt-4o": {
+      "status": "success",
+      "risk_level": "safe",
+      "confidence_score": 85,
+      "explanation": "This transaction involves standard token transfer functions such as transfer, transferFrom, and approve, which are commonly used in ERC20 token contracts. There are no asset transfers or state changes detected, and the gas usage is efficient.",
+      "custom_scoring_criteria": {
+        "behavior_patterns_weight": 0.4,
+        "gas_efficiency_weight": 0.4,
+        "ui_security_weight": 0.2,
+        "reasoning": "Behavior patterns are weighted higher due to the importance of function call complexity and asset movements in determining security risks. Gas efficiency is equally weighted as it reflects the transaction's operational efficiency and potential cost implications. UI/JavaScript security is weighted lower due to the absence of JavaScript code in this transaction."
+      },
+      "recommendations": [
+        "Monitor future transactions for any unusual patterns or asset movements.",
+        "Ensure that the contract's functions are audited for security vulnerabilities.",
+        "Maintain regular checks against updated security databases for new threats."
+      ],
+      "category_analysis": {
+        "behavior_score": 90,
+        "context_score": 80,
+        "ui_score": 85
+      },
+      "analysis_time": 4.11
+    }
+  },
+  "consensus_analysis": {
+    "risk_level_consensus": "safe",
+    "average_confidence": 88.33,
+    "confidence_range": "85-95",
+    "models_agreed": true
+  },
+  "performance_metrics": {
+    "fastest_model": "gpt-3.5-turbo",
+    "slowest_model": "gpt-4o-mini",
+    "average_time": 3.94,
+    "total_analysis_time": 11.81
+  },
+  "consensus_result": {
+    "risk_level": "safe",
+    "confidence_score": 88,
+    "custom_scoring_criteria": {
+      "behavior_patterns_weight": 0.45,
+      "gas_efficiency_weight": 0.35,
+      "ui_security_weight": 0.2
+    },
+    "explanation": "The transaction involves standard token transfer functions (transfer, transferFrom, approve) commonly used in ERC20 token contracts. There are no asset transfers or state changes detected, and the gas usage is efficient. All models agree on the absence of suspicious behavior, leading to a consensus on the safety of the transaction.",
+    "recommendations": [
+      "Continue monitoring for any changes in transaction patterns.",
+      "Maintain best practices for smart contract development to ensure ongoing security."
+    ],
+    "category_analysis": {
+      "behavior_score": 87,
+      "context_score": 80,
+      "ui_score": 95
+    },
+    "consensus_metadata": {
+      "consensus_reached": true,
+      "rounds_used": 0,
+      "method": "unanimous_agreement",
+      "primary_model": "gpt-4o-mini",
+      "timestamp": "2025-09-19 18:52:41"
+    }
+  }
+}

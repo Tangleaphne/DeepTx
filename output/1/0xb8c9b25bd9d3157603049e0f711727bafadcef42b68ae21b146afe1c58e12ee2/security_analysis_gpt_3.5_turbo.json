@@ -1,0 +1,24 @@
+{
+  "risk_level": "safe",
+  "confidence_score": 95,
+  "custom_scoring_criteria": {
+    "behavior_patterns_weight": 0.4,
+    "gas_efficiency_weight": 0.4,
+    "ui_security_weight": 0.2,
+    "reasoning": "Given the absence of suspicious behavior, the focus is on gas efficiency and behavior patterns for this transaction."
+  },
+  "explanation": "The transaction involves standard token transfer functions with no asset transfers or state changes. Gas usage is relatively efficient.",
+  "recommendations": [
+    "Continue monitoring for any future transactions that may exhibit abnormal behavior."
+  ],
+  "category_analysis": {
+    "behavior_score": 80,
+    "context_score": 90,
+    "ui_score": 100
+  },
+  "analysis_metadata": {
+    "model": "gpt-3.5-turbo",
+    "analysis_time_seconds": 2.9,
+    "timestamp": "2025-09-19 18:52:34"
+  }
+}

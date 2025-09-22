@@ -158,7 +158,7 @@ def run_transaction_analysis(tx_hash):
                         "to": Web3.to_checksum_address(to_addr),
                         "value": value
                     })
-
+        
         for log in trace_item.get("logs", []):
             topics = log.get("topics", [])
             if len(topics) >= 3 and topics[0].lower().startswith("0xddf252ad"):
@@ -305,7 +305,7 @@ def run_transaction_analysis(tx_hash):
 
     if state_rows:
         df_state = pd.DataFrame(state_rows)
-        df_state.to_csv(STATE_CHANGES_PATH, index=False)
+        df_state.to_csv(STATE_CHANGES_PATH, index=False) #?
 
     print(f"Analysis complete. Generated files:")
     print(f"  - decoded_trace.json: Transaction trace")

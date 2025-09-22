@@ -1,0 +1,85 @@
+
+// Function pizza_mandate_apology not found in 43506849d7c04f9138d1a2050bbf3a0c054402dd
+
+// Function from 43506849d7c04f9138d1a2050bbf3a0c054402dd - transfer in openzeppelin_contracts_token_ERC20_IERC20.sol
+function transfer(address recipient, uint256 amount) external returns (bool);
+
+    /**
+     * @dev Returns the remaining number of tokens that `spender` will be
+     * allowed to spend on behalf of `owner` through {transferFrom}. This is
+     * zero by default.
+     *
+     * This value changes when {approve} or {transferFrom} are called.
+     */
+    function allowance(address owner, address spender) external view returns (uint256);
+
+    /**
+     * @dev Sets `amount` as the allowance of `spender` over the caller's tokens.
+     *
+     * Returns a boolean value indicating whether the operation succeeded.
+     *
+     * IMPORTANT: Beware that changing an allowance with this method brings the risk
+     * that someone may use both the old and the new allowance by unfortunate
+     * transaction ordering. One possible solution to mitigate this race
+     * condition is to first reduce the spender's allowance to 0 and set the
+     * desired value afterwards:
+     * https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
+     *
+     * Emits an {Approval} event.
+     */
+    function approve(address spender, uint256 amount) external returns (bool);
+
+    /**
+     * @dev Moves `amount` tokens from `sender` to `recipient` using the
+     * allowance mechanism. `amount` is then deducted from the caller's
+     * allowance.
+     *
+     * Returns a boolean value indicating whether the operation succeeded.
+     *
+     * Emits a {Transfer} event.
+     */
+    function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
+
+    /**
+     * @dev Emitted when `value` tokens are moved from one account (`from`) to
+     * another (`to`).
+     *
+     * Note that `value` may be zero.
+     */
+    event Transfer(address indexed from, address indexed to, uint256 value);
+
+    /**
+     * @dev Emitted when the allowance of a `spender` for an `owner` is set by
+     * a call to {approve}. `value` is the new allowance.
+     */
+    event Approval(address indexed owner, address indexed spender, uint256 value);
+}
+
+// Function pizza_mandate_apology not found in a0b86991c6218b36c1d19d4a2e9eb0ce3606eb48
+
+// Function transfer not found in a0b86991c6218b36c1d19d4a2e9eb0ce3606eb48
+
+// Function from d206ac7fef53d83ed4563e770b28dba90d0d9ec8 - execute in src_msca_6900_v0.7_managers_StandardExecutor.sol
+function execute(address target, uint256 value, bytes calldata data) internal returns (bytes memory returnData) {
+        // reverts if the target is a plugin because modular account should be calling plugin via execution functions
+        // defined in IPluginExecutor
+        if (ERC165Checker.supportsInterface(target, type(IPlugin).interfaceId)) {
+            revert TargetIsPlugin(target);
+        }
+        return target.callWithReturnDataOrRevert(value, data);
+    }
+
+    /// @dev Refer to IStandardExecutor
+    function executeBatch(Call[] calldata calls) internal returns (bytes[] memory returnData) {
+        returnData = new bytes[](calls.length);
+        for (uint256 i = 0; i < calls.length; ++i) {
+            if (ERC165Checker.supportsInterface(calls[i].target, type(IPlugin).interfaceId)) {
+                revert TargetIsPlugin(calls[i].target);
+            }
+            returnData[i] = calls[i].target.callWithReturnDataOrRevert(calls[i].value, calls[i].data);
+        }
+        return returnData;
+    }
+}
+
+// Function execute not found in ee7ae85f2fe2239e27d9c1e23fffe168d63b4055

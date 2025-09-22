@@ -18,7 +18,7 @@ class MaliciousChecker:
         self.malicious_domains: Set[str] = set()
         self.load_databases()
         
-        # Fraud pattern rules - add specific detection rules here
+        # ?Fraud pattern rules - add specific detection rules here
         self.fraud_patterns = {
             # 'pattern_category': [r'regex_pattern1', r'regex_pattern2'],
             # 'reentrancy': [...],
