@@ -280,7 +280,7 @@ def process_transaction_data(dir_path: str) -> Dict[str, Any]:
     
     # 2. CONTEXT ANALYSIS (Gas)
     print("  2. Loading context analysis (gas) data...")
-    gas_path = os.path.join(dir_path, "gas_usage.csv")
+    gas_path = os.path.join(dir_path, "call_trace.csv")
     gas_data = load_csv(gas_path)
     
     # Gas analysis summary

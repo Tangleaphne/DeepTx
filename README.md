@@ -33,13 +33,13 @@ bifrost
 pip install -r requirements.txt
 ```
 
-3. Set up environment variables (required):
+3. Configure environment variables via .env (required):
 ```bash
-export Transpose_Api_Key="your_heimdall_api_key" # Optional, https://docs.transpose.io/quickstart/
-export RPC_URL="your_ethereum_rpc_url"
-export ETHERSCAN_API_KEY="your_etherscan_api_key"
-export OPENAI_API_KEY="your_openai_api_key"
-export OPENAI_BASE_URL="https://api.openai.com/v1"  # Optional, defaults to OpenAI
+Transpose_Api_Key="your_heimdall_api_key" # Optional, https://docs.transpose.io/quickstart/
+RPC_URL="your_ethereum_rpc_url"
+ETHERSCAN_API_KEY="your_etherscan_api_key"
+OPENAI_API_KEY="your_openai_api_key"
+OPENAI_BASE_URL="https://api.openai.com/v1"  # Optional, defaults to OpenAI
 ```
 
 **Note**: All API keys are required. The tool will validate them at startup and provide clear error messages if any are missing.

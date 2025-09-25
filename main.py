@@ -73,7 +73,7 @@ def print_substep(substep: str, completed: bool = False):
         print(f"  - {substep}")
 
 
-def run_transaction_analysis(tx_hash: str) -> bool:
+def run_transaction_analysis(tx_hash: str, tx_dir: str) -> bool:
     """Run transaction analysis"""
     print_step_header(1, 4, "TRANSACTION ANALYSIS")
     
@@ -86,7 +86,7 @@ def run_transaction_analysis(tx_hash: str) -> bool:
         print_substep("State changes tracking and storage analysis...", False)
         
         # Execute transaction analysis
-        result = run_transaction_analysis_from_main(tx_hash)
+        result = run_transaction_analysis_from_main(tx_hash, tx_dir)
         
         if result:
             print_substep("Transaction inspection and trace extraction...", True)
@@ -106,7 +106,7 @@ def run_transaction_analysis(tx_hash: str) -> bool:
         return False
 
 
-def run_security_check(tx_hash: str) -> bool:
+def run_security_check(tx_hash: str, tx_dir: str) -> bool:
     """Run security database check"""
     print_step_header(2, 4, "SECURITY DATABASE CHECK")
     
@@ -115,7 +115,6 @@ def run_security_check(tx_hash: str) -> bool:
         print_substep("Suspicious code pattern identification...", False)
         
         # Check for optional files and offer interactive input
-        tx_dir = f"output/1/{tx_hash.lower()}"
         urls_file = os.path.join(tx_dir, "url.txt")
         js_file = os.path.join(tx_dir, "js.txt")
         
@@ -168,7 +167,7 @@ def run_security_check(tx_hash: str) -> bool:
             print_substep("JavaScript code security pattern detection...", False)
         
         # Execute security check
-        analyze_transaction_output(tx_hash)
+        analyze_transaction_output(tx_hash, tx_dir)
         
         print_substep("Malicious address database checking...", True)
         print_substep("Suspicious code pattern identification...", True)
@@ -192,11 +191,9 @@ def run_security_check(tx_hash: str) -> bool:
         return False
 
 
-def run_llm_analysis(tx_hash: str) -> Dict[str, Any]:
+def run_llm_analysis(tx_hash: str, tx_dir: str) -> Dict[str, Any]:
     """Run multi-model LLM analysis"""
     print_step_header(3, 4, "MULTI-MODEL LLM ANALYSIS")
-    
-    tx_dir = f"output/1/{tx_hash.lower()}"
     
     if not os.path.exists(tx_dir):
         print(f"✗ Transaction directory not found: {tx_dir}")
@@ -241,11 +238,9 @@ def analyze_transaction_type(tx_hash: str) -> str:
         return "Unknown"
 
 
-def generate_final_report(tx_hash: str, llm_results: Dict[str, Any]) -> Dict[str, Any]:
+def generate_final_report(tx_hash: str, tx_dir: str, llm_results: Dict[str, Any]) -> Dict[str, Any]:
     """Generate final comprehensive report"""
     print_step_header(4, 4, "FINAL REPORT GENERATION")
-    
-    tx_dir = f"output/1/{tx_hash.lower()}"
     
     try:
         print_substep("Loading consensus results and model comparisons...", False)
@@ -317,6 +312,23 @@ def generate_final_report(tx_hash: str, llm_results: Dict[str, Any]) -> Dict[str
     except Exception as e:
         print(f"\n✗ Error generating final report: {e}")
         return {}
+    
+def get_chain_id(rpc_url: str) -> str:
+    payload = {
+        "jsonrpc": "2.0",
+        "method": "eth_chainId",
+        "params": [],
+        "id": 1
+    }
+    headers = {"Content-Type": "application/json"}
+    response = requests.post(rpc_url, data=json.dumps(payload), headers=headers)
+
+    if response.status_code == 200:
+        result = response.json()
+        chain_id_hex = result["result"]
+        return str(int(chain_id_hex, 16))
+    else:
+        raise RuntimeError(f"Error fetching chain_id: {response.status_code} {response.text}")
 
 
 def main():
@@ -339,25 +351,29 @@ def main():
     print("="*60)
     print(f"Analyzing transaction: {tx_hash}")
     print(f"Start time: {time.strftime('%Y-%m-%d %H:%M:%S')}")
-    
+
+    rpc_url = os.environ.get("RPC_URL", "https://ethereum.therpc.io")
+    chain_id = get_chain_id(rpc_url)
+    tx_dir = os.path.join("output", chain_id, tx_hash.lower())
+
     # Step 1: Transaction analysis
-    if not run_transaction_analysis(tx_hash):
+    if not run_transaction_analysis(tx_hash, tx_dir):
         print("\n✗ Analysis failed at transaction analysis step")
         sys.exit(1)
     
     # Step 2: Security database check
-    if not run_security_check(tx_hash):
+    if not run_security_check(tx_hash, tx_dir):
         print("\n✗ Analysis failed at security check step")
         sys.exit(1)
     
     # Step 3: Multi-model LLM analysis
-    llm_results = run_llm_analysis(tx_hash)
+    llm_results = run_llm_analysis(tx_hash, tx_dir)
     if not llm_results:
         print("\n✗ Analysis failed at LLM analysis step")
         sys.exit(1)
     
     # Step 4: Generate final report
-    final_report = generate_final_report(tx_hash, llm_results)
+    final_report = generate_final_report(tx_hash, tx_dir, llm_results)
     if not final_report:
         print("\n✗ Analysis failed at final report generation step")
         sys.exit(1)

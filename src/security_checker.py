@@ -115,11 +115,12 @@ class MaliciousChecker:
         return detected
 
 
-def analyze_transaction_output(tx_hash: str):
+def analyze_transaction_output(tx_hash: str, tx_dir:str):
     """Analyze transaction output data"""
     
     # Set paths
-    output_dir = f"output/1/{tx_hash.lower()}"
+    # output_dir = f"output/1/{tx_hash.lower()}"
+    output_dir = tx_dir
     
     if not os.path.exists(output_dir):
         print(f"Output directory not found: {output_dir}")

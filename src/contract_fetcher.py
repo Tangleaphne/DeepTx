@@ -74,6 +74,16 @@ class ContractDecompilerTool:
         contract_address = contract_address.lower().replace("0x", "")
         print(f"[*] Checking contract: 0x{contract_address}")
 
+        output_dir = f"contracts/{contract_address}/"
+        if os.path.exists(output_dir):
+            existing_files = [
+                f for f in os.listdir(output_dir) 
+                if f.endswith(".sol") or f.endswith(".bin")
+            ]
+            if existing_files:
+                print(f"[!] Contract 0x{contract_address} already downloaded. Skipping...")
+                return
+
         info = self.fetcher.fetch_contract_source("0x" + contract_address)
         if info:
             source_code = info["SourceCode"]
@@ -89,7 +99,6 @@ class ContractDecompilerTool:
                     print(f"[!] Failed to parse multi-file JSON: {e}")
             else:
                 # Single file format, save directly as contract_address.sol
-                output_dir = f"contracts/{contract_address}/"
                 os.makedirs(output_dir, exist_ok=True)
                 filepath = os.path.join(output_dir, f"{contract_address}.sol")
                 with open(filepath, "w", encoding="utf-8") as f:

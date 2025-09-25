@@ -8,6 +8,7 @@ import os
 import json
 import re
 import time
+import requests
 import pandas as pd
 from pathlib import Path
 from collections import defaultdict
@@ -18,20 +19,10 @@ from datetime import datetime
 from .heimdall_client import inspect_transaction
 from .contract_fetcher import ContractDecompilerTool, ContractFetcher
 
-def run_transaction_analysis(tx_hash):
+def run_transaction_analysis(tx_hash, tx_dir):
     """Run comprehensive transaction analysis (analyze.py functionality)"""
-    
-    # === Configurations ===
-    TX_ID = tx_hash.lower()
-    TRACE_DIR = os.path.join("output", "1", TX_ID)
-    TRACE_PATH = os.path.join(TRACE_DIR, "decoded_trace.json")
-    TRACE_TXT_PATH = os.path.join(TRACE_DIR, "trace.txt")
-    CONTRACTS_DIR = "contracts"
-    OUTPUT_CODE_PATH = os.path.join(TRACE_DIR, "code.txt")
-    ASSET_FLOWS_PATH = os.path.join(TRACE_DIR, "asset_flows.csv")
-    GAS_USAGE_PATH = os.path.join(TRACE_DIR, "gas_usage.csv")
-    STATE_CHANGES_PATH = os.path.join(TRACE_DIR, "state_changes.csv") #?
 
+    # === Configurations ===
     # api_key = os.environ.get("HEIMDALL_API_KEY")
     api_key = os.environ.get("HEIMDALL_API_KEY")
     if not api_key:
@@ -41,27 +32,36 @@ def run_transaction_analysis(tx_hash):
     etherscan_api = os.environ.get("ETHERSCAN_API_KEY")
     if not etherscan_api:
         raise ValueError("ETHERSCAN_API_KEY environment variable is required")
+    
+    TRACE_PATH = os.path.join(tx_dir, "decoded_trace.json")
+    TRACE_TXT_PATH = os.path.join(tx_dir, "trace.txt")
+    CONTRACTS_DIR = "contracts"
+    OUTPUT_CODE_PATH = os.path.join(tx_dir, "code.txt")
+    ASSET_FLOWS_PATH = os.path.join(tx_dir, "asset_flows.csv")
+    CALL_TRACE_PATH = os.path.join(tx_dir, "call_trace.csv")
+    GAS_INFO_PATH = os.path.join(tx_dir, "gas_info.txt")
+    STATE_CHANGES_PATH = os.path.join(tx_dir, "state_changes.csv") 
 
     # Initialize Web3
     w3 = Web3(Web3.HTTPProvider(rpc_url))
 
     # === Step 1: Heimdall Inspect ===
-    inspect_transaction(tx_hash, api_key=api_key, rpc_url=rpc_url)
+    inspect_transaction(tx_hash, api_key=api_key, rpc_url=rpc_url, tx_dir=tx_dir)
 
-    # === Step 2: Clean Trace File ===
-    def clean_trace_file(trace_path):
-        if not os.path.exists(trace_path):
-            return
-        with open(trace_path, "r", encoding="utf-8") as f:
-            lines = f.readlines()
-        start_index = next((i for i, line in enumerate(lines) if "heimdall::inspect" in line), None)
-        if start_index is not None:
-            with open(trace_path, "w", encoding="utf-8") as f:
-                f.writelines(lines[start_index:])
+    # # === Step 2: Clean Trace File ===
+    # def clean_trace_file(trace_path):
+    #     if not os.path.exists(trace_path):
+    #         return
+    #     with open(trace_path, "r", encoding="utf-8") as f:
+    #         lines = f.readlines()
+    #     start_index = next((i for i, line in enumerate(lines) if "heimdall::inspect" in line), None)
+    #     if start_index is not None:
+    #         with open(trace_path, "w", encoding="utf-8") as f:
+    #             f.writelines(lines[start_index:])
 
-    clean_trace_file(TRACE_TXT_PATH)
+    # clean_trace_file(TRACE_TXT_PATH)
 
-    # === Step 3: Load Trace and Collect Addresses ===
+    # === Step 2: Load Trace and Collect Addresses ===
     if not os.path.exists(TRACE_PATH):
         print(f"Error: decoded_trace.json not found")
         return False
@@ -82,6 +82,59 @@ def run_transaction_analysis(tx_hash):
     collect_addresses(trace_data)
     print(f"Found {len(involved_addresses)} contract addresses")
 
+    # === Step 3: Call Trace and Gas Usage Analysis ===
+    tx = w3.eth.get_transaction(tx_hash)
+    block = w3.eth.get_block(tx.blockNumber)
+    tx_gas_price = tx.gasPrice
+    block_base_fee = getattr(block, "baseFeePerGas", None)
+    
+    with open(GAS_INFO_PATH, "w", encoding="utf-8") as f:
+        f.write(f"tx_gas_price: {tx_gas_price}\n")
+        if block_base_fee is not None:
+            f.write(f"block_base_fee: {block_base_fee}\n")
+        else:
+            f.write("block_base_fee: None\n")
+    print(f"Gas info saved to {GAS_INFO_PATH}")
+
+    call_trace = []
+    def hex_to_int(h):
+        try:
+            return int(h, 16)
+        except:
+            return None
+
+    def collect_func_info(item, depth=0):
+        action = item.get("action", {})
+        result = item.get("result", {})
+        func_info = action.get("resolvedFunction", {})
+        fn_name = func_info.get("name") 
+        gas_alloc = hex_to_int(action.get("gas", "0x0"))
+        gas_used = hex_to_int(result.get("gasUsed", "0x0"))
+        gas_remain = (gas_alloc - gas_used) if gas_alloc is not None and gas_used is not None else None
+        call_type = (action.get("callType", "") or "").lower()
+        if call_type != "staticcall":
+            call_trace.append({
+                "depth": depth,
+                "from": action.get("from", "").lower(),
+                "to": action.get("to", "").lower(),
+                "call_type": call_type,
+                "function": fn_name,
+                "gas_allocated": gas_alloc,
+                "gas_used": gas_used,
+                "gas_remaining": gas_remain
+            })
+        for sub in item.get("subtraces", []):
+            collect_func_info(sub, depth+1)
+
+    collect_func_info(trace_data)
+
+    df_call_trace = pd.DataFrame(call_trace)
+    df_call_trace = df_call_trace[[
+        "depth", "from", "to", "call_type", "function",
+        "gas_allocated", "gas_used", "gas_remaining"
+    ]]
+    df_call_trace.to_csv(CALL_TRACE_PATH, index=False)
+
     # === Step 4: Fetch Contracts ===
     fetcher = ContractFetcher(api_key=etherscan_api)
     tool = ContractDecompilerTool(fetcher)
@@ -97,46 +150,54 @@ def run_transaction_analysis(tx_hash):
         action = trace_item.get("action", {})
         to_addr = action.get("to", "").lower().replace("0x", "")
         func_info = action.get("resolvedFunction")
-        selector = action.get("functionSelector")
         if func_info and "name" in func_info:
             called_functions.add((to_addr, func_info["name"]))
-        elif selector:
-            called_functions.add((to_addr, f"Unresolved_{selector}"))
         for sub in trace_item.get("subtraces", []):
             collect_function_calls(sub)
-
     collect_function_calls(trace_data)
 
     # === Step 6: Extract Function Code ===
     Path(os.path.dirname(OUTPUT_CODE_PATH)).mkdir(parents=True, exist_ok=True)
     written_funcs = set()
-    with open(OUTPUT_CODE_PATH, "w", encoding="utf-8") as output_file:
-        for addr, func in sorted(called_functions):
-            if (addr, func) in written_funcs:
+    buffer = []
+    # with open(OUTPUT_CODE_PATH, "w", encoding="utf-8") as output_file:
+    for addr, func in sorted(called_functions):
+        if (addr, func) in written_funcs:
+            continue
+        contract_path = os.path.join(CONTRACTS_DIR, addr)
+        if not os.path.isdir(contract_path):
+            buffer.append(f"\n// Contract directory not found for address {addr}\n")
+            continue
+        matched = False
+        for file in os.listdir(contract_path):
+            if not file.endswith(".sol"):
                 continue
-            contract_path = os.path.join(CONTRACTS_DIR, addr)
-            if not os.path.isdir(contract_path):
-                output_file.write(f"\n// Contract directory not found for address {addr}\n")
-                continue
-            matched = False
-            for file in os.listdir(contract_path):
-                if not file.endswith(".sol"):
-                    continue
-                file_path = os.path.join(contract_path, file)
-                with open(file_path, "r", encoding="utf-8") as f:
-                    code = f.read()
-                pattern = rf"(function\s+{re.escape(func)}\s*\(.*?\)[\s\S]*?\{{[\s\S]*?\n\}})"
-                matches = re.findall(pattern, code, re.IGNORECASE)
-                if matches:
-                    output_file.write(f"\n// Function from {addr} - {func} in {file}\n")
-                    output_file.write(matches[0])
-                    output_file.write("\n")
-                    written_funcs.add((addr, func))
-                    matched = True
-                    break
-            if not matched:
-                output_file.write(f"\n// Function {func} not found in {addr}\n")
+            file_path = os.path.join(contract_path, file)
+            with open(file_path, "r", encoding="utf-8") as f:
+                code = f.read()
+            pattern = rf"(function\s+{re.escape(func)}\s*\(.*?\)[\s\S]*?\{{[\s\S]*?\n\}})"
+            matches = re.findall(pattern, code, re.IGNORECASE)
+            if matches:
+                buffer.append(f"\n// Function from {addr} - {func} in {file}\n")
+                buffer.append(matches[0])
+                buffer.append("\n")
                 written_funcs.add((addr, func))
+                matched = True
+                break
+        if not matched:
+            buffer.append(f"\n// Function {func} not found in {addr}\n")
+            written_funcs.add((addr, func))
+
+    def strip_comments(text: str) -> str:
+        text = re.sub(r"/\*[\s\S]*?\*/", "", text)
+        text = re.sub(r"//.*?$", "", text, flags=re.MULTILINE)
+        text = re.sub(r"\n[ \t]*\n(?:[ \t]*\n)+", "\n\n", text)
+        return text.strip() + "\n"
+
+    clean = strip_comments("".join(buffer))
+
+    with open(OUTPUT_CODE_PATH, "w", encoding="utf-8") as output_file:
+        output_file.write(clean)
 
     # === Step 7: Asset Flow Analysis ===
     def collect_transfers(trace_item, transfers):
@@ -228,55 +289,6 @@ def run_transaction_analysis(tx_hash):
         df_assets = df_assets[["token_address", "name", "symbol", "from", "to", "value_normalized"]]
         df_assets.to_csv(ASSET_FLOWS_PATH, index=False)
 
-    # === Step 8: Gas Usage Analysis ===
-    tx = w3.eth.get_transaction(tx_hash)
-    receipt = w3.eth.get_transaction_receipt(tx_hash)
-    block = w3.eth.get_block(tx.blockNumber)
-
-    tx_gas_price = tx.gasPrice
-    block_base_fee = getattr(block, "baseFeePerGas", None)
-
-    gas_records = []
-    def hex_to_int(h):
-        try:
-            return int(h, 16)
-        except:
-            return None
-
-    def collect_gas_usage(item, depth=0):
-        action = item.get("action", {})
-        result = item.get("result", {})
-        func_info = action.get("resolvedFunction", {})
-        selector = action.get("functionSelector")
-        fn_name = func_info.get("name") if func_info else f"Unresolved_{selector}"
-        gas_alloc = hex_to_int(action.get("gas", "0x0"))
-        gas_used = hex_to_int(result.get("gasUsed", "0x0"))
-        gas_remain = (gas_alloc - gas_used) if gas_alloc is not None and gas_used is not None else None
-        gas_records.append({
-            "depth": depth,
-            "from": action.get("from", "").lower(),
-            "to": action.get("to", "").lower(),
-            "call_type": action.get("callType", ""),
-            "function": fn_name,
-            "gas_allocated": gas_alloc,
-            "gas_used": gas_used,
-            "gas_remaining": gas_remain,
-            "tx_gas_price": tx_gas_price,
-            "block_base_fee": block_base_fee
-        })
-        for sub in item.get("subtraces", []):
-            collect_gas_usage(sub, depth+1)
-
-    collect_gas_usage(trace_data)
-
-    df_gas = pd.DataFrame(gas_records)
-    df_gas = df_gas[[
-        "depth", "from", "to", "call_type", "function",
-        "gas_allocated", "gas_used", "gas_remaining",
-        "tx_gas_price", "block_base_fee"
-    ]]
-    df_gas.to_csv(GAS_USAGE_PATH, index=False)
-
     # === Step 9: State Changes Analysis ===
     state_changes = defaultdict(list)
 
@@ -309,21 +321,20 @@ def run_transaction_analysis(tx_hash):
 
     print(f"Analysis complete. Generated files:")
     print(f"  - decoded_trace.json: Transaction trace")
-    print(f"  - code.txt: Function source code")
+    print(f"  - call_trace.csv: Call trace and Gas usage analysis ({len(call_trace)} calls)")
     print(f"  - asset_flows.csv: Token transfers ({len(transfers)} transfers)")
-    print(f"  - gas_usage.csv: Gas analysis ({len(gas_records)} calls)")
     print(f"  - state_changes.csv: State changes ({len(state_rows)} changes)")
     
     return True
 
 
-def ask_for_optional_files(tx_hash):
+def ask_for_optional_files(tx_hash, tx_dir):
     """Ask user if they want to add optional files for security analysis"""
     
     print(f"\n[2/3] OPTIONAL SECURITY FILES")
     print(f"="*50)
     
-    output_dir = f"output/1/{tx_hash.lower()}"
+    output_dir = tx_dir
     url_file = os.path.join(output_dir, "url.txt")
     js_file = os.path.join(output_dir, "js.txt")
     
@@ -383,14 +394,14 @@ def ask_for_optional_files(tx_hash):
             break
 
 
-def run_security_analysis(tx_hash):
+def run_security_analysis(tx_hash, tx_dir):
     """Run security analysis (test_query.py functionality)"""
     
     print(f"\n[3/3] SECURITY ANALYSIS")
     print(f"="*50)
     
     from .security_checker import analyze_transaction_output
-    analyze_transaction_output(tx_hash)
+    analyze_transaction_output(tx_hash, tx_dir)
 
 
 def main():
@@ -407,23 +418,24 @@ def main():
         return
     
     tx_hash = os.sys.argv[1]
+    tx_dir = os.path.join("output", "chain_id", tx_hash.lower())
     
     try:
         # Step 1: Run transaction analysis
-        success = run_transaction_analysis(tx_hash)
+        success = run_transaction_analysis(tx_hash, tx_dir)
         if not success:
             print("Transaction analysis failed")
             return
         
         # Step 2: Ask for optional files
-        ask_for_optional_files(tx_hash)
+        ask_for_optional_files(tx_hash, tx_dir)
         
         # Step 3: Run security analysis
-        run_security_analysis(tx_hash)
+        run_security_analysis(tx_hash, tx_dir)
         
         print(f"\n" + "="*50)
         print("ANALYSIS COMPLETE")
-        print(f"Output directory: output/1/{tx_hash.lower()}")
+        print(f"Output directory: {tx_dir}")
         print("="*50)
         
     except KeyboardInterrupt:
