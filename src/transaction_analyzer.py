@@ -46,8 +46,9 @@ def run_transaction_analysis(tx_hash, tx_dir):
     w3 = Web3(Web3.HTTPProvider(rpc_url))
 
     # === Step 1: Heimdall Inspect ===
-    inspect_transaction(tx_hash, api_key=api_key, rpc_url=rpc_url, tx_dir=tx_dir)
-
+    print(f"1.Tx_dir is {tx_dir}")
+    inspect_transaction(tx_hash=tx_hash, api_key=api_key, rpc_url=rpc_url, tx_dir=tx_dir)
+    print(f"Tx_dir is {tx_dir}")
     # # === Step 2: Clean Trace File ===
     # def clean_trace_file(trace_path):
     #     if not os.path.exists(trace_path):
@@ -62,6 +63,27 @@ def run_transaction_analysis(tx_hash, tx_dir):
     # clean_trace_file(TRACE_TXT_PATH)
 
     # === Step 2: Load Trace and Collect Addresses ===
+    # if not os.path.exists(TRACE_PATH):
+    #     print(f"Error: decoded_trace.json not found")
+    #     return False
+
+    # with open(TRACE_PATH, "r", encoding="utf-8") as f:
+    #     trace_data = json.load(f)
+
+    # involved_addresses = set()
+    # def collect_addresses(trace_item):
+    #     action = trace_item.get("action", {})
+    #     if "from" in action:
+    #         involved_addresses.add(action["from"].lower())
+    #     if "to" in action:
+    #         involved_addresses.add(action["to"].lower())
+    #     for sub in trace_item.get("subtraces", []):
+    #         collect_addresses(sub)
+
+    # collect_addresses(trace_data)
+    # print(f"Found {len(involved_addresses)} contract addresses")
+
+    # === Step 3: Call Trace and Gas Usage Analysis ===
     if not os.path.exists(TRACE_PATH):
         print(f"Error: decoded_trace.json not found")
         return False
@@ -69,20 +91,6 @@ def run_transaction_analysis(tx_hash, tx_dir):
     with open(TRACE_PATH, "r", encoding="utf-8") as f:
         trace_data = json.load(f)
 
-    involved_addresses = set()
-    def collect_addresses(trace_item):
-        action = trace_item.get("action", {})
-        if "from" in action:
-            involved_addresses.add(action["from"].lower())
-        if "to" in action:
-            involved_addresses.add(action["to"].lower())
-        for sub in trace_item.get("subtraces", []):
-            collect_addresses(sub)
-
-    collect_addresses(trace_data)
-    print(f"Found {len(involved_addresses)} contract addresses")
-
-    # === Step 3: Call Trace and Gas Usage Analysis ===
     tx = w3.eth.get_transaction(tx_hash)
     block = w3.eth.get_block(tx.blockNumber)
     tx_gas_price = tx.gasPrice
@@ -136,6 +144,14 @@ def run_transaction_analysis(tx_hash, tx_dir):
     df_call_trace.to_csv(CALL_TRACE_PATH, index=False)
 
     # === Step 4: Fetch Contracts ===
+    
+    df_call_trace = pd.read_csv(CALL_TRACE_PATH)
+    involved_addresses = set()
+    involved_addresses.update(df_call_trace["from"].str.lower().unique())
+    involved_addresses.update(df_call_trace["to"].str.lower().unique())
+
+    print(f"Found {len(involved_addresses)} contract addresses")
+
     fetcher = ContractFetcher(api_key=etherscan_api)
     tool = ContractDecompilerTool(fetcher)
     for addr in sorted(involved_addresses):
@@ -145,48 +161,122 @@ def run_transaction_analysis(tx_hash, tx_dir):
             print(f"Failed to process {addr}: {e}")
 
     # === Step 5: Extract Functions ===
+    # called_functions = set()
+    # def collect_function_calls(trace_item):
+    #     action = trace_item.get("action", {})
+    #     to_addr = action.get("to", "").lower().replace("0x", "")
+    #     func_info = action.get("resolvedFunction")
+    #     if func_info and "name" in func_info:
+    #         called_functions.add((to_addr, func_info["name"]))
+    #     for sub in trace_item.get("subtraces", []):
+    #         collect_function_calls(sub)
+    # collect_function_calls(trace_data)
     called_functions = set()
-    def collect_function_calls(trace_item):
-        action = trace_item.get("action", {})
-        to_addr = action.get("to", "").lower().replace("0x", "")
-        func_info = action.get("resolvedFunction")
-        if func_info and "name" in func_info:
-            called_functions.add((to_addr, func_info["name"]))
-        for sub in trace_item.get("subtraces", []):
-            collect_function_calls(sub)
-    collect_function_calls(trace_data)
-
+    for _, row in df_call_trace.iterrows():
+        if pd.notna(row['function']): 
+            called_functions.add((
+                row['depth'],
+                row['from'].lower().replace("0x", ""),
+                row['to'].lower().replace("0x", ""),
+                row['function']
+            ))
     # === Step 6: Extract Function Code ===
+    def get_main_contract_file(contract_address):
+        url = f"https://api.etherscan.io/api?module=contract&action=getsourcecode&address=0x{contract_address}&apikey={etherscan_api}"
+        try:
+            response = requests.get(url)
+            data = response.json()
+            if data['status'] == '1' and data['result']:
+                source_info = data['result'][0]
+                if 'ContractName' in source_info and source_info['ContractName']:
+                    contract_name = source_info['ContractName']
+                    return f"{contract_name}.sol"
+        except Exception as e:
+            print(f"Error fetching main contract for {contract_address}: {e}")
+        return None
     Path(os.path.dirname(OUTPUT_CODE_PATH)).mkdir(parents=True, exist_ok=True)
     written_funcs = set()
     buffer = []
-    # with open(OUTPUT_CODE_PATH, "w", encoding="utf-8") as output_file:
-    for addr, func in sorted(called_functions):
+
+    for depth, from_addr, to_addr, func in called_functions:
+        addr = to_addr  
         if (addr, func) in written_funcs:
             continue
+        
         contract_path = os.path.join(CONTRACTS_DIR, addr)
         if not os.path.isdir(contract_path):
             buffer.append(f"\n// Contract directory not found for address {addr}\n")
+            written_funcs.add((addr, func))
             continue
+        
+        main_contract_file = get_main_contract_file(addr)
         matched = False
-        for file in os.listdir(contract_path):
-            if not file.endswith(".sol"):
-                continue
-            file_path = os.path.join(contract_path, file)
-            with open(file_path, "r", encoding="utf-8") as f:
-                code = f.read()
-            pattern = rf"(function\s+{re.escape(func)}\s*\(.*?\)[\s\S]*?\{{[\s\S]*?\n\}})"
-            matches = re.findall(pattern, code, re.IGNORECASE)
-            if matches:
-                buffer.append(f"\n// Function from {addr} - {func} in {file}\n")
-                buffer.append(matches[0])
-                buffer.append("\n")
-                written_funcs.add((addr, func))
-                matched = True
-                break
+        
+        if main_contract_file:
+            file_path = os.path.join(contract_path, main_contract_file)
+            if os.path.exists(file_path):
+                with open(file_path, "r", encoding="utf-8") as f:
+                    code = f.read()
+                pattern = rf"(function\s+{re.escape(func)}\s*\(.*?\)[\s\S]*?\{{[\s\S]*?\n\}})"
+                matches = re.findall(pattern, code, re.IGNORECASE)
+                if matches:
+                    buffer.append(f"\n// Function from {addr} - {func} in {main_contract_file} \n")
+                    buffer.append(matches[0])
+                    buffer.append("\n")
+                    written_funcs.add((addr, func))
+                    matched = True
+        
+        # search other files
+        if not matched:
+            for file in os.listdir(contract_path):
+                if not file.endswith(".sol") or (main_contract_file and file == main_contract_file):
+                    continue
+                
+                file_path = os.path.join(contract_path, file)
+                with open(file_path, "r", encoding="utf-8") as f:
+                    code = f.read()
+                
+                pattern = rf"(function\s+{re.escape(func)}\s*\(.*?\)[\s\S]*?\{{[\s\S]*?\n\}})"
+                matches = re.findall(pattern, code, re.IGNORECASE)
+                
+                if matches:
+                    buffer.append(f"\n// Function from {addr} - {func} in {file} \n")
+                    buffer.append(matches[0])
+                    buffer.append("\n")
+                    written_funcs.add((addr, func))
+                    matched = True
+                    break
+        
         if not matched:
             buffer.append(f"\n// Function {func} not found in {addr}\n")
             written_funcs.add((addr, func))
+    # with open(OUTPUT_CODE_PATH, "w", encoding="utf-8") as output_file:
+    # for addr, func in sorted(called_functions):
+    #     if (addr, func) in written_funcs:
+    #         continue
+    #     contract_path = os.path.join(CONTRACTS_DIR, addr)
+    #     if not os.path.isdir(contract_path):
+    #         buffer.append(f"\n// Contract directory not found for address {addr}\n")
+    #         continue
+    #     matched = False
+    #     for file in os.listdir(contract_path):
+    #         if not file.endswith(".sol"):
+    #             continue
+    #         file_path = os.path.join(contract_path, file)
+    #         with open(file_path, "r", encoding="utf-8") as f:
+    #             code = f.read()
+    #         pattern = rf"(function\s+{re.escape(func)}\s*\(.*?\)[\s\S]*?\{{[\s\S]*?\n\}})"
+    #         matches = re.findall(pattern, code, re.IGNORECASE)
+    #         if matches:
+    #             buffer.append(f"\n// Function from {addr} - {func} in {file}\n")
+    #             buffer.append(matches[0])
+    #             buffer.append("\n")
+    #             written_funcs.add((addr, func))
+    #             matched = True
+    #             break
+    #     if not matched:
+    #         buffer.append(f"\n// Function {func} not found in {addr}\n")
+    #         written_funcs.add((addr, func))
 
     def strip_comments(text: str) -> str:
         text = re.sub(r"/\*[\s\S]*?\*/", "", text)

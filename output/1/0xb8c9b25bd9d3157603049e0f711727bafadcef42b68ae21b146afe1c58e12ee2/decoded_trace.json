@@ -298,7 +298,7 @@
             "output": "0x",
             "decodedOutputs": []
           },
-          "error": "execution reverted",
+          "error": "Reverted",
           "subtraces": [
             {
               "trace_address": [
@@ -329,7 +329,7 @@
                 "output": "0x",
                 "decodedOutputs": []
               },
-              "error": "execution reverted",
+              "error": "Reverted",
               "subtraces": [],
               "logs": [],
               "diff": []
@@ -407,8 +407,42 @@
               },
               "error": null,
               "subtraces": [],
-              "logs": [],
-              "diff": []
+              "logs": [
+                {
+                  "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                  "topics": [
+                    "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+                    "0x000000000000000000000000ee7ae85f2fe2239e27d9c1e23fffe168d63b4055",
+                    "0x000000000000000000000000e8f5abe7c4043a2a09d6b54d2f655c4b0db185dd"
+                  ],
+                  "data": "0x0000000000000000000000000000000000000000000000000000000068c46944",
+                  "resolvedEvent": {
+                    "name": "Transfer",
+                    "signature": "Transfer(address,address,uint256)",
+                    "inputs": [
+                      "address",
+                      "address",
+                      "uint256"
+                    ]
+                  },
+                  "blockHash": "0x25d27ff74c3a46956b8a7f263d3dd083be18595ca5339025152eec17a6eef372",
+                  "blockNumber": 23398416,
+                  "transactionHash": "0xb8c9b25bd9d3157603049e0f711727bafadcef42b68ae21b146afe1c58e12ee2",
+                  "transactionIndex": 70,
+                  "logIndex": 113,
+                  "removed": false
+                }
+              ],
+              "diff": [
+                {
+                  "key": "0x60e06686b29bb6301af7769c9338c0fb9e0f9c8fabf250995ccbedca1d6dd171",
+                  "val": "0x74ec7c2428986"
+                },
+                {
+                  "key": "0xd2903b311426f167eaff89534dad9b4486f3bbc59567e3a61b220b0d1be0b576",
+                  "val": "0x68c46944"
+                }
+              ]
             }
           ],
           "logs": [],

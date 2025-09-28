@@ -78,7 +78,7 @@ class ContractDecompilerTool:
         if os.path.exists(output_dir):
             existing_files = [
                 f for f in os.listdir(output_dir) 
-                if f.endswith(".sol") or f.endswith(".bin")
+                if f.endswith(".sol")
             ]
             if existing_files:
                 print(f"[!] Contract 0x{contract_address} already downloaded. Skipping...")
