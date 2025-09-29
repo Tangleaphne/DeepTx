@@ -46,9 +46,9 @@ def run_transaction_analysis(tx_hash, tx_dir):
     w3 = Web3(Web3.HTTPProvider(rpc_url))
 
     # === Step 1: Heimdall Inspect ===
-    print(f"1.Tx_dir is {tx_dir}")
+    # print(f"1.Tx_dir is {tx_dir}")
     inspect_transaction(tx_hash=tx_hash, api_key=api_key, rpc_url=rpc_url, tx_dir=tx_dir)
-    print(f"Tx_dir is {tx_dir}")
+    # print(f"Tx_dir is {tx_dir}")
     # # === Step 2: Clean Trace File ===
     # def clean_trace_file(trace_path):
     #     if not os.path.exists(trace_path):
@@ -290,7 +290,38 @@ def run_transaction_analysis(tx_hash, tx_dir):
         output_file.write(clean)
 
     # === Step 7: Asset Flow Analysis ===
+    if tx_dir:
+        try:
+            # get chain_id
+            path_parts = tx_dir.split(os.sep)
+            if len(path_parts) >= 2 and path_parts[0] == "output":
+                chain_id_str = path_parts[1]  
+                chain_id = int(chain_id_str)
+            else:
+                chain_id = 1 
+        except (ValueError, IndexError):
+            chain_id = 1  
+    else:
+        chain_id = 1 
+
     def collect_transfers(trace_item, transfers):
+        native_token_map = {
+            1: "ETH",    # Ethereum Mainnet
+            56: "BNB",   # BSC
+            137: "POL",  # Polygon
+            146: "S",    # Sonic
+            1329: "Sei", # Sei
+            314: "FIL",  # Filecoin
+        }
+        native_token_symbol = native_token_map.get(chain_id, "ETH")
+
+        error_field = trace_item.get("error")
+        has_error = error_field is not None and error_field != "None" and error_field != ""
+        
+        if has_error:
+            # for sub in trace_item.get("subtraces", []):
+            #     collect_transfers(sub, transfers)
+            return
 
         action = trace_item.get("action", {})
         value_hex = action.get("value", "0x0")
@@ -304,7 +335,7 @@ def run_transaction_analysis(tx_hash, tx_dir):
                 to_addr = action.get("to", "")
                 if from_addr and to_addr:
                     transfers.append({
-                        "token_address": "ETH",
+                        "token_address": native_token_symbol,
                         "from": Web3.to_checksum_address(from_addr),
                         "to": Web3.to_checksum_address(to_addr),
                         "value": value
@@ -362,11 +393,27 @@ def run_transaction_analysis(tx_hash, tx_dir):
             decimals = 18
         token_meta[addr] = {"name": name, "symbol": symbol, "decimals": decimals}
         return token_meta[addr]
+    
+    native_token_meta = {
+        1: {"name": "Ether", "symbol": "ETH", "decimals": 18},
+        56: {"name": "Binance Coin", "symbol": "BNB", "decimals": 18},
+        137: {"name": "Polygon", "symbol": "POL", "decimals": 18},
+        146: {"name": "Sonic", "symbol": "S", "decimals": 18},
+        1329: {"name": "Sei", "symbol": "SEI", "decimals": 18},
+        314: {"name": "Filecoin", "symbol": "FIL", "decimals": 18}
+    }
 
     # Enrich transfers with token metadata
     for tx in transfers:
-        if tx["token_address"] == "ETH":
-            meta = {"name": "Ether", "symbol": "ETH", "decimals": 18}
+        # if tx["token_address"] == "ETH":
+        #     meta = {"name": "Ether", "symbol": "ETH", "decimals": 18}
+        if tx["token_address"] in ["ETH", "BNB", "POL", "S", "SEI", "FIL"]:
+            meta_config = native_token_meta.get(chain_id, native_token_meta[1])
+            meta = {
+                "name": meta_config["name"],
+                "symbol": meta_config["symbol"], 
+                "decimals": meta_config["decimals"]
+            }
         else:
             meta = get_token_info(tx["token_address"])
         tx.update(meta)
@@ -519,6 +566,7 @@ def main():
         
         # Step 2: Ask for optional files
         ask_for_optional_files(tx_hash, tx_dir)
+        print(f"Asked for optional files...")
         
         # Step 3: Run security analysis
         run_security_analysis(tx_hash, tx_dir)

@@ -75,15 +75,15 @@ def inspect_transaction(tx_hash, api_key=None, rpc_url=None, tx_dir=None):
     if api_key:
         command += ['-t', api_key]
 
-    output = run_heimdall(command, rpc_url, tx_dir)
+    output = run_heimdall(command, rpc_url, tx_hash, tx_dir)
     if not output:
         logging.error(f"Failed to inspect transaction {tx_hash}")
         return None
     # tx_dir = os.path.join("output", "1", tx_hash.lower())
-    os.makedirs(tx_dir, exist_ok=True)
-    trace_txt_path = os.path.join(tx_dir, "trace.txt")
+    # os.makedirs(tx_dir, exist_ok=True)
+    # trace_txt_path = os.path.join(tx_dir, "trace.txt")
 
-    with open(trace_txt_path, "w", encoding="utf-8") as f:
-        f.write(output)
+    # with open(trace_txt_path, "w", encoding="utf-8") as f:
+    #     f.write(output)
 
-    print(f"[+] Saved raw trace output to {trace_txt_path}")
+    # print(f"[+] Saved raw trace output to {trace_txt_path}")
