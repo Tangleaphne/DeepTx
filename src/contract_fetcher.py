@@ -6,6 +6,7 @@ import time
 from .heimdall_client import decompile_bytecode
 
 ETHERSCAN_API_KEY = os.environ.get("ETHERSCAN_API_KEY")
+ETHERSCAN_API_URL = os.environ.get("ETHERSCAN_API_URL")
 if not ETHERSCAN_API_KEY:
     raise ValueError("ETHERSCAN_API_KEY environment variable is required")
 
@@ -13,12 +14,14 @@ RPC_URL = os.environ.get("RPC_URL", "https://ethereum.therpc.io")
 
 
 class ContractFetcher:
-    def __init__(self, api_key=ETHERSCAN_API_KEY):
+    def __init__(self, api_key=ETHERSCAN_API_KEY, api_url=ETHERSCAN_API_URL):
         self.api_key = api_key
+        self.api_url = api_url
 
     def fetch_contract_source(self, contract_address):
         url = (
-            f"https://api.etherscan.io/api?module=contract&action=getsourcecode"
+            f"{self.api_url}?"
+            f"module=contract&action=getsourcecode"
             f"&address={contract_address}&apikey={self.api_key}"
         )
         response = requests.get(url, timeout=10)
@@ -43,7 +46,8 @@ class ContractFetcher:
 
     def fetch_contract_bytecode(self, contract_address):
         url = (
-            f"https://api.etherscan.io/api?module=proxy&action=eth_getCode"
+            f"{self.api_url}?"
+            f"module=proxy&action=eth_getCode"
             f"&address={contract_address}&tag=latest&apikey={self.api_key}"
         )
         response = requests.get(url, timeout=10)

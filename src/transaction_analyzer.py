@@ -29,6 +29,7 @@ def run_transaction_analysis(tx_hash, tx_dir):
         raise ValueError("HEIMDALL_API_KEY environment variable is required")
     
     rpc_url = os.environ.get("RPC_URL", "https://ethereum.therpc.io")
+    etherscan_api_url = os.environ.get("ETHERSCAN_API_URL")
     etherscan_api = os.environ.get("ETHERSCAN_API_KEY")
     if not etherscan_api:
         raise ValueError("ETHERSCAN_API_KEY environment variable is required")
@@ -182,7 +183,7 @@ def run_transaction_analysis(tx_hash, tx_dir):
             ))
     # === Step 6: Extract Function Code ===
     def get_main_contract_file(contract_address):
-        url = f"https://api.etherscan.io/api?module=contract&action=getsourcecode&address=0x{contract_address}&apikey={etherscan_api}"
+        url = f"{etherscan_api_url}?module=contract&action=getsourcecode&address=0x{contract_address}&apikey={etherscan_api}"
         try:
             response = requests.get(url)
             data = response.json()
