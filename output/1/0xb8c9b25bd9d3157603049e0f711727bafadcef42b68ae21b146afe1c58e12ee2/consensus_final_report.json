@@ -1,26 +1,37 @@
 {
-  "risk_level": "safe",
-  "confidence_score": 88,
+  "risk_level": "suspicious",
+  "confidence_score": 70,
   "custom_scoring_criteria": {
-    "behavior_patterns_weight": 0.45,
-    "gas_efficiency_weight": 0.35,
-    "ui_security_weight": 0.2
+    "behavior_patterns": {
+      "weight": 0.5,
+      "reasoning": "The presence of multiple function calls and delegate calls raises concerns about potential vulnerabilities, including reentrancy and unexpected state changes."
+    },
+    "gas_efficiency": {
+      "weight": 0.3,
+      "reasoning": "While gas usage is efficient, the complexity of the transaction necessitates a closer examination of the underlying logic."
+    },
+    "ui_javascript_security": {
+      "weight": 0.2,
+      "reasoning": "Although JavaScript security indicators are less relevant, UI security should still be considered, especially if user interactions are involved."
+    }
   },
-  "explanation": "The transaction involves standard token transfer functions (transfer, transferFrom, approve) commonly used in ERC20 token contracts. There are no asset transfers or state changes detected, and the gas usage is efficient. All models agree on the absence of suspicious behavior, leading to a consensus on the safety of the transaction.",
+  "explanation": "The transaction is classified as suspicious due to its complexity, involving multiple function calls and asset transfers, including delegate calls. While gas efficiency is acceptable, the intricate behavior patterns suggest potential risks that warrant further scrutiny. The consensus across models indicates a cautious approach is necessary.",
   "recommendations": [
-    "Continue monitoring for any changes in transaction patterns.",
-    "Maintain best practices for smart contract development to ensure ongoing security."
+    "Conduct a thorough review of the transaction logic to identify potential vulnerabilities.",
+    "Implement additional security measures to mitigate risks associated with delegate calls and complex interactions.",
+    "Monitor the transaction for any unusual behavior post-execution."
   ],
   "category_analysis": {
-    "behavior_score": 87,
-    "context_score": 80,
-    "ui_score": 95
+    "behavior_score": 65,
+    "context_score": 71.67,
+    "ui_score": 66.67,
+    "malicious_db_score": 0
   },
   "consensus_metadata": {
     "consensus_reached": true,
     "rounds_used": 0,
     "method": "unanimous_agreement",
     "primary_model": "gpt-4o-mini",
-    "timestamp": "2025-09-19 18:52:41"
+    "timestamp": "2025-09-30 06:47:35"
   }
 }

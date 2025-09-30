@@ -7,6 +7,7 @@ Uses smart token limits and provides simplified security assessment
 import os
 import json
 import re
+import pandas as pd
 from typing import Dict, Any, List
 from openai import OpenAI
 import os
@@ -234,18 +235,34 @@ def process_transaction_data(dir_path: str) -> Dict[str, Any]:
     print("  1. Loading behavior analysis data...")
     
     # Call chain (trace)
-    trace_path = os.path.join(dir_path, "decoded_trace.json")
-    trace_data = load_json(trace_path)
+    # trace_path = os.path.join(dir_path, "decoded_trace.json")
+    # trace_data = load_json(trace_path)
+    # call_chain = []
+    # if trace_data:
+    #     for call in trace_data.get("calls", [])[:15]:  # Limit to first 15 calls
+    #         call_chain.append({
+    #             "type": call.get("type", "unknown"),
+    #             "from": call.get("from", ""),
+    #             "to": call.get("to", ""),
+    #             "value": call.get("value", "0"),
+    #             "method": call.get("method", "")
+    #         })
+    call_trace_path = os.path.join(dir_path, "call_trace.csv")
     call_chain = []
-    if trace_data:
-        for call in trace_data.get("calls", [])[:15]:  # Limit to first 15 calls
+    if os.path.exists(call_trace_path):
+        df_call_trace = pd.read_csv(call_trace_path)
+        limited_calls = df_call_trace.head(15)
+        trace_data = df_call_trace.to_dict(orient='records')
+        for _, call in limited_calls.iterrows():
             call_chain.append({
-                "type": call.get("type", "unknown"),
+                "depth": call.get("depth", 0),
                 "from": call.get("from", ""),
                 "to": call.get("to", ""),
-                "value": call.get("value", "0"),
-                "method": call.get("method", "")
+                "call_type": call.get("call_type", "unknown"),
+                "function": call.get("function", "")
             })
+        
+        print(f"Loaded {len(call_chain)} call records from call_trace.csv")
     
     # Code analysis
     code_path = os.path.join(dir_path, "code.txt")
@@ -282,6 +299,7 @@ def process_transaction_data(dir_path: str) -> Dict[str, Any]:
     print("  2. Loading context analysis (gas) data...")
     gas_path = os.path.join(dir_path, "call_trace.csv")
     gas_data = load_csv(gas_path)
+    gas_info_path = os.path.join(dir_path, "gas_info.txt")
     
     # Gas analysis summary
     gas_analysis = {}
@@ -297,6 +315,22 @@ def process_transaction_data(dir_path: str) -> Dict[str, Any]:
             "total_calls": len(gas_data),
             "average_gas_per_call": round(total_gas_used / len(gas_data), 2) if gas_data else 0
         }
+
+        if os.path.exists(gas_info_path):
+            try:
+                with open(gas_info_path, 'r') as f:
+                    gas_info = {}
+                    for line in f:
+                        if ':' in line:
+                            key, value = line.strip().split(':', 1)
+                            gas_info[key.strip()] = value.strip()
+                
+                gas_analysis["tx_gas_price"] = int(gas_info.get("tx_gas_price", 0))
+                gas_analysis["block_base_fee"] = int(gas_info.get("block_base_fee", 0))
+            except Exception as e:
+                print(f"Error reading gas_info.txt: {e}")
+                gas_analysis["tx_gas_price"] = 0
+                gas_analysis["block_base_fee"] = 0
     
     # 3. UI ANALYSIS (JavaScript)
     print("  3. Loading UI analysis data...")
@@ -353,7 +387,7 @@ def process_transaction_data(dir_path: str) -> Dict[str, Any]:
     # Transaction context
     context = {
         "transaction_hash": os.path.basename(dir_path),
-        "trace_calls_total": len(trace_data.get("calls", [])) if trace_data else 0,
+        # "trace_calls_total": len(trace_data.get("calls", [])) if trace_data else 0,
         "trace_calls_analyzed": len(call_chain),
         "code_functions_found": len(code_analysis),
         "asset_transfers": len(asset_flows),

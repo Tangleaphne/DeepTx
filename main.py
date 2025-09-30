@@ -79,22 +79,22 @@ def run_transaction_analysis(tx_hash: str, tx_dir: str) -> bool:
     print_step_header(1, 4, "TRANSACTION ANALYSIS")
     
     try:
-        print_substep("Transaction inspection and trace extraction...", False)
+        print_substep("Transaction inspection...", False)
+        print_substep("Call trace extraction and gas usage analysis...", False)
         print_substep("Contract source code fetching and decompilation...", False)
-        print_substep("Function call analysis and code extraction...", False)
+        print_substep("Code extraction...", False)
         print_substep("Asset flow tracking and token transfer analysis...", False)
-        print_substep("Gas usage analysis and efficiency calculation...", False)
         print_substep("State changes tracking and storage analysis...", False)
         
         # Execute transaction analysis
         result = run_transaction_analysis_from_main(tx_hash, tx_dir)
         
         if result:
-            print_substep("Transaction inspection and trace extraction...", True)
+            print_substep("Transaction inspection...", True)
+            print_substep("Call trace extraction and gas usage analysis...", True)
             print_substep("Contract source code fetching and decompilation...", True)
-            print_substep("Function call analysis and code extraction...", True)
+            print_substep("Code extraction...", True)
             print_substep("Asset flow tracking and token transfer analysis...", True)
-            print_substep("Gas usage analysis and efficiency calculation...", True)
             print_substep("State changes tracking and storage analysis...", True)
             print("\n✓ Transaction analysis completed successfully")
             return True
