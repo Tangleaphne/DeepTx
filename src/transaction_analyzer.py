@@ -158,7 +158,7 @@ def run_transaction_analysis(tx_hash, tx_dir, chain_id):
 
     print(f"Found {len(involved_addresses)} contract addresses")
 
-    fetcher = ContractFetcher(chain_id, api_key=etherscan_api)
+    fetcher = ContractFetcher(tx_dir, chain_id, api_key=etherscan_api)
     tool = ContractDecompilerTool(fetcher)
     contract_names = {}
     for addr in sorted(involved_addresses):

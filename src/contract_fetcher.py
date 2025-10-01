@@ -14,10 +14,11 @@ RPC_URL = os.environ.get("RPC_URL", "https://ethereum.therpc.io")
 
 
 class ContractFetcher:
-    def __init__(self, chain_id, api_key=ETHERSCAN_API_KEY, api_url=ETHERSCAN_API_URL):
+    def __init__(self, tx_dir, chain_id, api_key=ETHERSCAN_API_KEY, api_url=ETHERSCAN_API_URL):
         self.api_key = api_key
         self.api_url = api_url
         self.chain_id = chain_id
+        self.tx_dir = tx_dir
 
     def fetch_contract_source(self, contract_address):
         url = (
@@ -122,7 +123,7 @@ class ContractDecompilerTool:
         self.fetcher = fetcher
 
     def save_multi_file_source(self, contract_address, sources_dict):
-        base_path = f"contracts/{self.fetcher.chain_id}/{contract_address}/"
+        base_path = f"{self.fetcher.tx_dir}/{contract_address}/"
         os.makedirs(base_path, exist_ok=True)
         for filename, content_info in sources_dict.items():
             clean_filename = filename.replace("@", "").replace("/", "_")
@@ -135,7 +136,7 @@ class ContractDecompilerTool:
         contract_address = contract_address.lower().replace("0x", "")
         print(f"[*] Checking contract: 0x{contract_address}")
 
-        output_dir = f"contracts/{self.fetcher.chain_id}/{contract_address}/"
+        output_dir = f"{self.fetcher.tx_dir}/{contract_address}/"
         if os.path.exists(output_dir):
             existing_files = [
                 f for f in os.listdir(output_dir) 
@@ -171,14 +172,14 @@ class ContractDecompilerTool:
                 print(f"[+] Single-file source saved: {filepath}")
                 return None
                       
-        elif not info:
+        elif info.get("proxy") == "0":
             print("[-] No verified source code found. Attempting decompilation...")
             bytecode = self.fetcher.fetch_contract_bytecode("0x" + contract_address)
             if not bytecode:
                 print("[!] Failed to fetch bytecode. Abort.")
                 return None
 
-            output_dir = f"contracts/{self.fetcher.chain_id}/{contract_address}/"
+            output_dir = f"{self.fetcher.tx_dir}/{contract_address}/"
             os.makedirs(output_dir, exist_ok=True)
             bytecode_file = f"{output_dir}{contract_address}.bin"
             with open(bytecode_file, "w") as f:
