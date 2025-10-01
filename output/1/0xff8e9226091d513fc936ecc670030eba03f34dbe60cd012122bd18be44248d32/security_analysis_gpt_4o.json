@@ -1,0 +1,25 @@
+{
+  "risk_level": "safe",
+  "confidence_score": 85,
+  "custom_scoring_criteria": {
+    "behavior_patterns": 0.5,
+    "gas_efficiency_and_usage_patterns": 0.3,
+    "ui_javascript_security_indicators": 0.2
+  },
+  "explanation": "This transaction involves multiple asset transfers and state changes, primarily focusing on token approvals and transfers. The functions and call patterns analyzed do not exhibit any suspicious or malicious behavior, and no malicious addresses or code patterns were detected.",
+  "recommendations": [
+    "Monitor the involved addresses for any unusual future activity.",
+    "Ensure that the contracts involved are from trusted sources.",
+    "Review the transaction details for any unexpected changes in asset balances."
+  ],
+  "category_analysis": {
+    "behavior_score": 90,
+    "context_score": 70,
+    "ui_score": 100
+  },
+  "analysis_metadata": {
+    "model": "gpt-4o",
+    "analysis_time_seconds": 4.55,
+    "timestamp": "2025-10-01 19:30:21"
+  }
+}

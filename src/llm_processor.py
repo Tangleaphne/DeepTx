@@ -234,24 +234,10 @@ def process_transaction_data(dir_path: str) -> Dict[str, Any]:
     # 1. BEHAVIOR ANALYSIS
     print("  1. Loading behavior analysis data...")
     
-    # Call chain (trace)
-    # trace_path = os.path.join(dir_path, "decoded_trace.json")
-    # trace_data = load_json(trace_path)
-    # call_chain = []
-    # if trace_data:
-    #     for call in trace_data.get("calls", [])[:15]:  # Limit to first 15 calls
-    #         call_chain.append({
-    #             "type": call.get("type", "unknown"),
-    #             "from": call.get("from", ""),
-    #             "to": call.get("to", ""),
-    #             "value": call.get("value", "0"),
-    #             "method": call.get("method", "")
-    #         })
     call_trace_path = os.path.join(dir_path, "call_trace.csv")
     call_chain = []
     if os.path.exists(call_trace_path):
         df_call_trace = pd.read_csv(call_trace_path)
-        # limited_calls = df_call_trace.head(15)
         trace_data = df_call_trace.to_dict(orient='records')
         for call in trace_data:
             call_chain.append({

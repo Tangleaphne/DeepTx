@@ -82,40 +82,6 @@ class ContractFetcher:
         except Exception as e:
             print(f"Error fetching bytecode for {contract_address}: {e}")
         return None
-    #     response = requests.get(url, timeout=10)
-    #     time.sleep(1)  
-    #     if response.status_code == 200:
-    #         status = response.json().get("status")
-    #         result = response.json().get("result", [])
-    #         # result = response.json()["result"]
-    #         if status == "1":
-    #             if result and not result[0].get("SourceCode"):
-    #                 return None
-    #             if result and result[0].get("SourceCode"):
-    #                 return result[0]
-    #         # if status==1 & None, then Pass, else try again
-    #         retry = requests.get(url, timeout=10)
-    #         time.sleep(1)
-    #         if retry.status_code == 200:
-    #             retry_result = retry.json().get("result", [])
-    #             if retry_result and retry_result[0].get("SourceCode"):
-    #                 return retry_result[0]
-    #     return None
-
-    # def fetch_contract_bytecode(self, contract_address):
-    #     url = (
-    #         f"{self.api_url}?"
-    #         f"module=proxy&action=eth_getCode"
-    #         f"&address={contract_address}&tag=latest&apikey={self.api_key}"
-    #     )
-    #     response = requests.get(url, timeout=10)
-    #     time.sleep(1)  
-    #     if response.status_code == 200:
-    #         data = response.json()
-    #         bytecode = data.get("result")
-    #         if bytecode and bytecode != "0x":
-    #             return bytecode
-    #     return None
 
 
 class ContractDecompilerTool:

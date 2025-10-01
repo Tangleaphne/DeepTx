@@ -1,0 +1,34 @@
+{
+  "risk_level": "safe",
+  "confidence_score": 85,
+  "custom_scoring_criteria": {
+    "behavior_patterns": {
+      "weight": 0.5,
+      "reasoning": "The complexity of function calls and asset movements is moderate, but there are no suspicious patterns detected."
+    },
+    "gas_efficiency": {
+      "weight": 0.3,
+      "reasoning": "Gas usage is relatively high, but it is within expected limits for the number of calls and operations performed."
+    },
+    "ui_js_security": {
+      "weight": 0.2,
+      "reasoning": "No JavaScript code was present, which reduces potential UI vulnerabilities."
+    }
+  },
+  "explanation": "This transaction involves multiple asset transfers and state changes, primarily involving ERC20 tokens and Ether. The function calls appear to be standard and do not exhibit any malicious behavior.",
+  "recommendations": [
+    "Monitor the transaction for any unusual follow-up activity.",
+    "Conduct periodic audits of the involved contracts for security vulnerabilities.",
+    "Ensure that all interacting parties are verified and trusted."
+  ],
+  "category_analysis": {
+    "behavior_score": 90,
+    "context_score": 75,
+    "ui_score": 100
+  },
+  "analysis_metadata": {
+    "model": "gpt-4o-mini",
+    "analysis_time_seconds": 17.94,
+    "timestamp": "2025-10-01 19:30:13"
+  }
+}

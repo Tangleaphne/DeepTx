@@ -23,7 +23,6 @@ def run_transaction_analysis(tx_hash, tx_dir, chain_id):
     """Run comprehensive transaction analysis (analyze.py functionality)"""
 
     # === Configurations ===
-    # api_key = os.environ.get("TRANSPOSE_API_KEY")
     api_key = os.environ.get("TRANSPOSE_API_KEY")
     if not api_key:
         raise ValueError("TRANSPOSE_API_KEY environment variable is required")
@@ -46,44 +45,9 @@ def run_transaction_analysis(tx_hash, tx_dir, chain_id):
     w3 = Web3(Web3.HTTPProvider(rpc_url))
 
     # === Step 1: Heimdall Inspect ===
-    # print(f"1.Tx_dir is {tx_dir}")
     inspect_transaction(tx_hash=tx_hash, api_key=api_key, rpc_url=rpc_url, tx_dir=tx_dir)
-    # print(f"Tx_dir is {tx_dir}")
-    # # === Step 2: Clean Trace File ===
-    # def clean_trace_file(trace_path):
-    #     if not os.path.exists(trace_path):
-    #         return
-    #     with open(trace_path, "r", encoding="utf-8") as f:
-    #         lines = f.readlines()
-    #     start_index = next((i for i, line in enumerate(lines) if "heimdall::inspect" in line), None)
-    #     if start_index is not None:
-    #         with open(trace_path, "w", encoding="utf-8") as f:
-    #             f.writelines(lines[start_index:])
 
-    # clean_trace_file(TRACE_TXT_PATH)
-
-    # === Step 2: Load Trace and Collect Addresses ===
-    # if not os.path.exists(TRACE_PATH):
-    #     print(f"Error: decoded_trace.json not found")
-    #     return False
-
-    # with open(TRACE_PATH, "r", encoding="utf-8") as f:
-    #     trace_data = json.load(f)
-
-    # involved_addresses = set()
-    # def collect_addresses(trace_item):
-    #     action = trace_item.get("action", {})
-    #     if "from" in action:
-    #         involved_addresses.add(action["from"].lower())
-    #     if "to" in action:
-    #         involved_addresses.add(action["to"].lower())
-    #     for sub in trace_item.get("subtraces", []):
-    #         collect_addresses(sub)
-
-    # collect_addresses(trace_data)
-    # print(f"Found {len(involved_addresses)} contract addresses")
-
-    # === Step 3: Call Trace and Gas Usage Analysis ===
+    # === Step 2: Extract Gas Info ===
     if not os.path.exists(TRACE_PATH):
         print(f"Error: decoded_trace.json not found")
         return False
@@ -102,16 +66,15 @@ def run_transaction_analysis(tx_hash, tx_dir, chain_id):
             f.write(f"block_base_fee: {block_base_fee}\n")
         else:
             f.write("block_base_fee: None\n")
-    print(f"Gas info saved to {GAS_INFO_PATH}")
 
+    # === Step 3: Call Trace and Gas Usage Analysis ===
     call_trace = []
     def hex_to_int(h):
         try:
             return int(h, 16)
         except:
             return None
-    receipt = w3.eth.get_transaction_receipt(tx_hash)
-    print(f"实际Gas Used: {receipt.gasUsed}")
+    
     def collect_func_info(item, depth=0):
         if item is None:
             return
@@ -136,7 +99,6 @@ def run_transaction_analysis(tx_hash, tx_dir, chain_id):
         for sub in item.get("subtraces", []):
             collect_func_info(sub, depth+1)
 
-    # collect_func_info(item=trace_data)
     if trace_data:
         collect_func_info(item=trace_data)
     else:
@@ -149,8 +111,7 @@ def run_transaction_analysis(tx_hash, tx_dir, chain_id):
     ]]
     df_call_trace.to_csv(CALL_TRACE_PATH, index=False)
 
-    # === Step 4: Fetch Contracts ===
-    
+    # === Step 4: Fetch Contracts ===   
     df_call_trace = pd.read_csv(CALL_TRACE_PATH)
     involved_addresses = set()
     involved_addresses.update(df_call_trace["from"].str.lower().unique())
@@ -170,16 +131,6 @@ def run_transaction_analysis(tx_hash, tx_dir, chain_id):
             print(f"Failed to process {addr}: {e}")
 
     # === Step 5: Extract Functions ===
-    # called_functions = set()
-    # def collect_function_calls(trace_item):
-    #     action = trace_item.get("action", {})
-    #     to_addr = action.get("to", "").lower().replace("0x", "")
-    #     func_info = action.get("resolvedFunction")
-    #     if func_info and "name" in func_info:
-    #         called_functions.add((to_addr, func_info["name"]))
-    #     for sub in trace_item.get("subtraces", []):
-    #         collect_function_calls(sub)
-    # collect_function_calls(trace_data)
     called_functions = set()
     for _, row in df_call_trace.iterrows():
         if pd.notna(row['function']): 
@@ -188,19 +139,6 @@ def run_transaction_analysis(tx_hash, tx_dir, chain_id):
                 row['function']
             ))
     # === Step 6: Extract Function Code ===
-    # def get_main_contract_file(contract_address):
-    #     url = f"{etherscan_api_url}?module=contract&action=getsourcecode&address=0x{contract_address}&apikey={etherscan_api}"
-    #     try:
-    #         response = requests.get(url)
-    #         data = response.json()
-    #         if data['status'] == '1' and data['result']:
-    #             source_info = data['result'][0]
-    #             if 'ContractName' in source_info and source_info['ContractName']:
-    #                 contract_name = source_info['ContractName']
-    #                 return f"{contract_name}.sol"
-    #     except Exception as e:
-    #         print(f"Error fetching main contract for {contract_address}: {e}")
-    #     return None
     Path(os.path.dirname(OUTPUT_CODE_PATH)).mkdir(parents=True, exist_ok=True)
     buffer = []
 
@@ -247,33 +185,6 @@ def run_transaction_analysis(tx_hash, tx_dir, chain_id):
                     break
         if not matches:
             buffer.append(f"\n< Function {func} not found in {addr} >\n")
-    # with open(OUTPUT_CODE_PATH, "w", encoding="utf-8") as output_file:
-    # for addr, func in sorted(called_functions):
-    #     if (addr, func) in written_funcs:
-    #         continue
-    #     contract_path = os.path.join(CONTRACTS_DIR, addr)
-    #     if not os.path.isdir(contract_path):
-    #         buffer.append(f"\n// Contract directory not found for address {addr}\n")
-    #         continue
-    #     matched = False
-    #     for file in os.listdir(contract_path):
-    #         if not file.endswith(".sol"):
-    #             continue
-    #         file_path = os.path.join(contract_path, file)
-    #         with open(file_path, "r", encoding="utf-8") as f:
-    #             code = f.read()
-    #         pattern = rf"(function\s+{re.escape(func)}\s*\(.*?\)[\s\S]*?\{{[\s\S]*?\n\}})"
-    #         matches = re.findall(pattern, code, re.IGNORECASE)
-    #         if matches:
-    #             buffer.append(f"\n// Function from {addr} - {func} in {file}\n")
-    #             buffer.append(matches[0])
-    #             buffer.append("\n")
-    #             written_funcs.add((addr, func))
-    #             matched = True
-    #             break
-    #     if not matched:
-    #         buffer.append(f"\n// Function {func} not found in {addr}\n")
-    #         written_funcs.add((addr, func))
 
     def strip_comments(text: str) -> str:
         text = re.sub(r"/\*[\s\S]*?\*/", "", text)
@@ -287,15 +198,6 @@ def run_transaction_analysis(tx_hash, tx_dir, chain_id):
         output_file.write(clean)
 
     # === Step 7: Asset Flow Analysis ===
-    # if tx_dir:
-    #         # get chain_id
-    #         path_parts = tx_dir.split(os.sep)
-    #         if len(path_parts) >= 2 and path_parts[0] == "output":
-    #             chain_id_str = path_parts[1]  
-    #             chain_id = int(chain_id_str) 
-    # else:
-    #     chain_id = 1 
-
     def collect_transfers(trace_item, transfers):
         native_token_map = {
             1: "ETH",    # Ethereum Mainnet
@@ -311,8 +213,6 @@ def run_transaction_analysis(tx_hash, tx_dir, chain_id):
         has_error = error_field is not None and error_field != "None" and error_field != ""
         
         if has_error:
-            # for sub in trace_item.get("subtraces", []):
-            #     collect_transfers(sub, transfers)
             return
 
         action = trace_item.get("action", {})
@@ -398,8 +298,6 @@ def run_transaction_analysis(tx_hash, tx_dir, chain_id):
 
     # Enrich transfers with token metadata
     for tx in transfers:
-        # if tx["token_address"] == "ETH":
-        #     meta = {"name": "Ether", "symbol": "ETH", "decimals": 18}
         if not tx["token_address"].startswith("0x"):
             meta_config = native_token_meta.get(chain_id, native_token_meta[1])
             meta = {
@@ -414,7 +312,6 @@ def run_transaction_analysis(tx_hash, tx_dir, chain_id):
 
 
     # Save asset flows
-    # if transfers:
     df_assets = pd.DataFrame(transfers)
     df_assets = df_assets[["token_address", "name", "symbol", "from", "to", "value"]]
     df_assets.to_csv(ASSET_FLOWS_PATH, index=False)

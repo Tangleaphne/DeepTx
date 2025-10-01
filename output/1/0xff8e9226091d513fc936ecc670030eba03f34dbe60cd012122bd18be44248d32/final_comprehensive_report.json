@@ -1,0 +1,38 @@
+{
+  "transaction_info": {
+    "tx_hash": "0xff8e9226091d513fc936ecc670030eba03f34dbe60cd012122bd18be44248d32",
+    "transaction_type": "Smart Contract Interaction",
+    "analysis_timestamp": "2025-10-01 19:31:17"
+  },
+  "security_assessment": {
+    "risk_level": "suspicious",
+    "confidence_score": 75,
+    "consensus_method": "unanimous_agreement"
+  },
+  "transaction_analysis": {
+    "explanation": "All models assessed the transaction as suspicious, highlighting the complexity of function calls and the potential for overlooked vulnerabilities. While there is no clear malicious behavior detected, the intricate interactions warrant a cautious approach. The consensus reflects a balanced view, acknowledging the insights from each model regarding the nature of ERC20 interactions.",
+    "scoring_criteria": {
+      "behavior_patterns": {
+        "weight": 0.45,
+        "reasoning": "The complexity of function calls and potential for overlooked vulnerabilities remain significant concerns."
+      },
+      "gas_efficiency": {
+        "weight": 0.3,
+        "reasoning": "Gas usage is within expected limits, but the intricate call chain suggests further scrutiny is necessary."
+      },
+      "ui_js_security": {
+        "weight": 0.15,
+        "reasoning": "The absence of JavaScript code reduces UI vulnerabilities, but other attack vectors must still be considered."
+      },
+      "state_changes": {
+        "weight": 0.1,
+        "reasoning": "State changes are present and could indicate underlying risks that need to be monitored."
+      }
+    }
+  },
+  "recommendations": [
+    "Conduct a deeper analysis of the function call complexity to identify any hidden vulnerabilities.",
+    "Monitor the transaction closely for any unusual behavior or state changes post-execution.",
+    "Consider implementing additional security measures to mitigate potential risks associated with complex interactions."
+  ]
+}

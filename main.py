@@ -370,7 +370,6 @@ def main():
 
     rpc_url = os.environ.get("RPC_URL", "https://ethereum.therpc.io")
     chain_id = get_chain_id(rpc_url)
-    print(f"Get chain Id is {chain_id}")
     tx_dir = os.path.join("output", chain_id, tx_hash.lower())
 
     # Step 1: Transaction analysis
