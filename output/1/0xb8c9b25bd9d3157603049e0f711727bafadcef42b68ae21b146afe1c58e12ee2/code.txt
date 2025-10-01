@@ -1,30 +1,11 @@
-< Contract directory not found for address a0b86991c6218b36c1d19d4a2e9eb0ce3606eb48 >
-
-< Contract directory not found for address 43506849d7c04f9138d1a2050bbf3a0c054402dd >
-
-< Contract directory not found for address 43506849d7c04f9138d1a2050bbf3a0c054402dd >
-
-< Function from d206ac7fef53d83ed4563e770b28dba90d0d9ec8 - execute in src_msca_6900_v0.7_managers_StandardExecutor.sol >
-function execute(address target, uint256 value, bytes calldata data) internal returns (bytes memory returnData) {
-
-        if (ERC165Checker.supportsInterface(target, type(IPlugin).interfaceId)) {
-            revert TargetIsPlugin(target);
-        }
-        return target.callWithReturnDataOrRevert(value, data);
-    }
-
-    function executeBatch(Call[] calldata calls) internal returns (bytes[] memory returnData) {
-        returnData = new bytes[](calls.length);
-        for (uint256 i = 0; i < calls.length; ++i) {
-            if (ERC165Checker.supportsInterface(calls[i].target, type(IPlugin).interfaceId)) {
-                revert TargetIsPlugin(calls[i].target);
-            }
-            returnData[i] = calls[i].target.callWithReturnDataOrRevert(calls[i].value, calls[i].data);
-        }
-        return returnData;
-    }
-}
-
-< Contract directory not found for address a0b86991c6218b36c1d19d4a2e9eb0ce3606eb48 >
+< Contract directory not found for address d206ac7fef53d83ed4563e770b28dba90d0d9ec8 >
 
 < Contract directory not found for address ee7ae85f2fe2239e27d9c1e23fffe168d63b4055 >
+
+< Contract directory not found for address 43506849d7c04f9138d1a2050bbf3a0c054402dd >
+
+< Contract directory not found for address 43506849d7c04f9138d1a2050bbf3a0c054402dd >
+
+< Contract directory not found for address a0b86991c6218b36c1d19d4a2e9eb0ce3606eb48 >
+
+< Contract directory not found for address a0b86991c6218b36c1d19d4a2e9eb0ce3606eb48 >
