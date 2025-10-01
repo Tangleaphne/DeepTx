@@ -146,7 +146,7 @@ class ContractDecompilerTool:
                 return None
 
         info = self.fetcher.fetch_contract_source("0x" + contract_address)
-        print(f"{info}")
+        # print(f"{info}")
         if info["proxy"] == "0":
             source_code = info["SourceCode"]
             if source_code.startswith("{{") and source_code.endswith("}}"):
