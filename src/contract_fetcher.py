@@ -14,50 +14,107 @@ RPC_URL = os.environ.get("RPC_URL", "https://ethereum.therpc.io")
 
 
 class ContractFetcher:
-    def __init__(self, api_key=ETHERSCAN_API_KEY, api_url=ETHERSCAN_API_URL):
+    def __init__(self, chain_id, api_key=ETHERSCAN_API_KEY, api_url=ETHERSCAN_API_URL):
         self.api_key = api_key
         self.api_url = api_url
+        self.chain_id = chain_id
 
     def fetch_contract_source(self, contract_address):
         url = (
             f"{self.api_url}?"
-            f"module=contract&action=getsourcecode"
+            f"chainid={self.chain_id}&module=contract&action=getsourcecode"
             f"&address={contract_address}&apikey={self.api_key}"
         )
-        response = requests.get(url, timeout=10)
-        time.sleep(1)  
-        if response.status_code == 200:
-            status = response.json().get("status")
-            result = response.json().get("result", [])
-            # result = response.json()["result"]
-            if status == "1":
-                if result and not result[0].get("SourceCode"):
-                    return None
-                if result and result[0].get("SourceCode"):
-                    return result[0]
-            # if status==1 & None, then Pass, else try again
-            retry = requests.get(url, timeout=10)
+        contract_info = {
+            "source_code": None,
+            "contract_name": None,
+            "proxy": None
+        }
+        try:
+            response = requests.get(url, timeout=10)
             time.sleep(1)
-            if retry.status_code == 200:
-                retry_result = retry.json().get("result", [])
-                if retry_result and retry_result[0].get("SourceCode"):
-                    return retry_result[0]
-        return None
+            
+            if response.status_code == 200:
+                data = response.json()
+                status = data.get("status")
+                result = data.get("result", [])
+                
+                if status == "1" and result:
+                    source_info = result[0]
+                    
+                    contract_info.update({
+                        "source_code": source_info.get("SourceCode"),
+                        "contract_name": source_info.get("ContractName"),
+                        "proxy": source_info.get("Proxy")
+                    })
+                    
+                    if not contract_info["source_code"]:
+                        retry_response = requests.get(url, timeout=10)
+                        time.sleep(1)
+                        if retry_response.status_code == 200:
+                            retry_data = retry_response.json()
+                            retry_result = retry_data.get("result", [])
+                            if retry_result and retry_result[0].get("SourceCode"):
+                                contract_info["source_code"] = retry_result[0].get("SourceCode")
+                                contract_info["contract_name"] = retry_result[0].get("ContractName")
+                                contract_info["proxy"] = retry_result[0].get("Proxy")
+
+        except Exception as e:
+            print(f"Error fetching contract info for {contract_address}: {e}")
+        
+        return contract_info
 
     def fetch_contract_bytecode(self, contract_address):
         url = (
             f"{self.api_url}?"
-            f"module=proxy&action=eth_getCode"
+            f"chainid={self.chain_id}&module=proxy&action=eth_getCode"
             f"&address={contract_address}&tag=latest&apikey={self.api_key}"
         )
-        response = requests.get(url, timeout=10)
-        time.sleep(1)  
-        if response.status_code == 200:
-            data = response.json()
-            bytecode = data.get("result")
-            if bytecode and bytecode != "0x":
-                return bytecode
+        try:
+            response = requests.get(url, timeout=10)
+            time.sleep(1)
+            if response.status_code == 200:
+                data = response.json()
+                bytecode = data.get("result")
+                if bytecode and bytecode != "0x":
+                    return bytecode
+        except Exception as e:
+            print(f"Error fetching bytecode for {contract_address}: {e}")
         return None
+    #     response = requests.get(url, timeout=10)
+    #     time.sleep(1)  
+    #     if response.status_code == 200:
+    #         status = response.json().get("status")
+    #         result = response.json().get("result", [])
+    #         # result = response.json()["result"]
+    #         if status == "1":
+    #             if result and not result[0].get("SourceCode"):
+    #                 return None
+    #             if result and result[0].get("SourceCode"):
+    #                 return result[0]
+    #         # if status==1 & None, then Pass, else try again
+    #         retry = requests.get(url, timeout=10)
+    #         time.sleep(1)
+    #         if retry.status_code == 200:
+    #             retry_result = retry.json().get("result", [])
+    #             if retry_result and retry_result[0].get("SourceCode"):
+    #                 return retry_result[0]
+    #     return None
+
+    # def fetch_contract_bytecode(self, contract_address):
+    #     url = (
+    #         f"{self.api_url}?"
+    #         f"module=proxy&action=eth_getCode"
+    #         f"&address={contract_address}&tag=latest&apikey={self.api_key}"
+    #     )
+    #     response = requests.get(url, timeout=10)
+    #     time.sleep(1)  
+    #     if response.status_code == 200:
+    #         data = response.json()
+    #         bytecode = data.get("result")
+    #         if bytecode and bytecode != "0x":
+    #             return bytecode
+    #     return None
 
 
 class ContractDecompilerTool:
@@ -86,10 +143,11 @@ class ContractDecompilerTool:
             ]
             if existing_files:
                 print(f"[!] Contract 0x{contract_address} already downloaded. Skipping...")
-                return
+                return None
 
         info = self.fetcher.fetch_contract_source("0x" + contract_address)
-        if info:
+        print(f"{info}")
+        if info["proxy"] == "0":
             source_code = info["SourceCode"]
             if source_code.startswith("{{") and source_code.endswith("}}"):
                 # Multi-file JSON format, remove outer braces
@@ -99,8 +157,11 @@ class ContractDecompilerTool:
                     sources_dict = source_code_json.get("sources", {})
                     self.save_multi_file_source(contract_address, sources_dict)
                     print("[+] Multi-file source code found and saved.")
+                    return info["contract_name"] 
                 except Exception as e:
                     print(f"[!] Failed to parse multi-file JSON: {e}")
+                    return None
+                
             else:
                 # Single file format, save directly as contract_address.sol
                 os.makedirs(output_dir, exist_ok=True)
@@ -108,12 +169,14 @@ class ContractDecompilerTool:
                 with open(filepath, "w", encoding="utf-8") as f:
                     f.write(source_code)
                 print(f"[+] Single-file source saved: {filepath}")
-        else:
+                return None
+                      
+        elif not info:
             print("[-] No verified source code found. Attempting decompilation...")
             bytecode = self.fetcher.fetch_contract_bytecode("0x" + contract_address)
             if not bytecode:
                 print("[!] Failed to fetch bytecode. Abort.")
-                return
+                return None
 
             output_dir = f"contracts/{contract_address}/"
             os.makedirs(output_dir, exist_ok=True)
@@ -123,6 +186,7 @@ class ContractDecompilerTool:
 
             result = decompile_bytecode(bytecode_file, name=contract_address, rpc_url=RPC_URL, output=output_dir)
             print(result)
+            return None
 
 
 if __name__ == "__main__":

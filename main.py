@@ -74,7 +74,7 @@ def print_substep(substep: str, completed: bool = False):
         print(f"  - {substep}")
 
 
-def run_transaction_analysis(tx_hash: str, tx_dir: str) -> bool:
+def run_transaction_analysis(tx_hash: str, tx_dir: str, chain_id: str) -> bool:
     """Run transaction analysis"""
     print_step_header(1, 4, "TRANSACTION ANALYSIS")
     
@@ -87,7 +87,7 @@ def run_transaction_analysis(tx_hash: str, tx_dir: str) -> bool:
         print_substep("State changes tracking and storage analysis...", False)
         
         # Execute transaction analysis
-        result = run_transaction_analysis_from_main(tx_hash, tx_dir)
+        result = run_transaction_analysis_from_main(tx_hash, tx_dir, chain_id)
         
         if result:
             print_substep("Transaction inspection...", True)
@@ -359,7 +359,7 @@ def main():
     tx_dir = os.path.join("output", chain_id, tx_hash.lower())
 
     # Step 1: Transaction analysis
-    if not run_transaction_analysis(tx_hash, tx_dir):
+    if not run_transaction_analysis(tx_hash, tx_dir, chain_id):
         print("\n✗ Analysis failed at transaction analysis step")
         sys.exit(1)
     

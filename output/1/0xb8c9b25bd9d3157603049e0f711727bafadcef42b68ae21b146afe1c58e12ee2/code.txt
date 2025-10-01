@@ -1,16 +1,12 @@
-function transfer(address recipient, uint256 amount) external returns (bool);
+< Function execute not found in ee7ae85f2fe2239e27d9c1e23fffe168d63b4055 >
 
-    function allowance(address owner, address spender) external view returns (uint256);
+< Function pizza_mandate_apology not found in a0b86991c6218b36c1d19d4a2e9eb0ce3606eb48 >
 
-    function approve(address spender, uint256 amount) external returns (bool);
+< Function transfer not found in a0b86991c6218b36c1d19d4a2e9eb0ce3606eb48 >
 
-    function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
+< Function pizza_mandate_apology not found in 43506849d7c04f9138d1a2050bbf3a0c054402dd >
 
-    event Transfer(address indexed from, address indexed to, uint256 value);
-
-    event Approval(address indexed owner, address indexed spender, uint256 value);
-}
-
+< Function from d206ac7fef53d83ed4563e770b28dba90d0d9ec8 - execute in src_msca_6900_v0.7_managers_StandardExecutor.sol >
 function execute(address target, uint256 value, bytes calldata data) internal returns (bytes memory returnData) {
 
         if (ERC165Checker.supportsInterface(target, type(IPlugin).interfaceId)) {
@@ -29,4 +25,18 @@ function execute(address target, uint256 value, bytes calldata data) internal re
         }
         return returnData;
     }
+}
+
+< Function from 43506849d7c04f9138d1a2050bbf3a0c054402dd - transfer in openzeppelin_contracts_token_ERC20_IERC20.sol >
+function transfer(address recipient, uint256 amount) external returns (bool);
+
+    function allowance(address owner, address spender) external view returns (uint256);
+
+    function approve(address spender, uint256 amount) external returns (bool);
+
+    function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
+
+    event Transfer(address indexed from, address indexed to, uint256 value);
+
+    event Approval(address indexed owner, address indexed spender, uint256 value);
 }

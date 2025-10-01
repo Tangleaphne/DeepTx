@@ -251,9 +251,9 @@ def process_transaction_data(dir_path: str) -> Dict[str, Any]:
     call_chain = []
     if os.path.exists(call_trace_path):
         df_call_trace = pd.read_csv(call_trace_path)
-        limited_calls = df_call_trace.head(15)
+        # limited_calls = df_call_trace.head(15)
         trace_data = df_call_trace.to_dict(orient='records')
-        for _, call in limited_calls.iterrows():
+        for call in trace_data:
             call_chain.append({
                 "depth": call.get("depth", 0),
                 "from": call.get("from", ""),
@@ -289,11 +289,19 @@ def process_transaction_data(dir_path: str) -> Dict[str, Any]:
     
     # Asset flows
     asset_path = os.path.join(dir_path, "asset_flows.csv")
-    asset_flows = load_csv(asset_path)
+    if os.path.exists(asset_path):
+        asset_flows = load_csv(asset_path)
+    else:
+        print(f"File not found: {asset_path}, skipping")
+        asset_flows = pd.DataFrame()
     
     # State changes
     state_path = os.path.join(dir_path, "state_changes.csv")
-    state_changes = load_csv(state_path)
+    if os.path.exists(state_path):
+        state_changes = load_csv(state_path)
+    else:
+        print(f"File not found: {state_path}, skipping")
+        state_changes = pd.DataFrame()
     
     # 2. CONTEXT ANALYSIS (Gas)
     print("  2. Loading context analysis (gas) data...")

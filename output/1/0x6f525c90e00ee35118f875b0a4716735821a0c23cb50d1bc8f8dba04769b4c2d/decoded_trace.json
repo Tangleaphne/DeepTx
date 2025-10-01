@@ -1,0 +1,22 @@
+{
+  "trace_address": [],
+  "action": {
+    "from": "0x9c19b0497997fe9e75862688a295168070456951",
+    "to": "0xe7c63c0348bcc0909e9db6ac67e7ab52f9bd4538",
+    "value": "0x1027fbe76809000",
+    "gas": "0x0",
+    "input": "0x",
+    "callType": "call",
+    "resolvedFunction": null,
+    "decodedInputs": []
+  },
+  "result": {
+    "gasUsed": "0x0",
+    "output": "0x",
+    "decodedOutputs": []
+  },
+  "error": null,
+  "subtraces": [],
+  "logs": [],
+  "diff": []
+}

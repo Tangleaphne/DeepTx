@@ -19,7 +19,7 @@ from datetime import datetime
 from .heimdall_client import inspect_transaction
 from .contract_fetcher import ContractDecompilerTool, ContractFetcher
 
-def run_transaction_analysis(tx_hash, tx_dir):
+def run_transaction_analysis(tx_hash, tx_dir, chain_id):
     """Run comprehensive transaction analysis (analyze.py functionality)"""
 
     # === Configurations ===
@@ -35,7 +35,7 @@ def run_transaction_analysis(tx_hash, tx_dir):
         raise ValueError("ETHERSCAN_API_KEY environment variable is required")
     
     TRACE_PATH = os.path.join(tx_dir, "decoded_trace.json")
-    TRACE_TXT_PATH = os.path.join(tx_dir, "trace.txt")
+    # TRACE_TXT_PATH = os.path.join(tx_dir, "trace.txt")
     CONTRACTS_DIR = "contracts"
     OUTPUT_CODE_PATH = os.path.join(tx_dir, "code.txt")
     ASSET_FLOWS_PATH = os.path.join(tx_dir, "asset_flows.csv")
@@ -111,31 +111,37 @@ def run_transaction_analysis(tx_hash, tx_dir):
             return int(h, 16)
         except:
             return None
-
+    receipt = w3.eth.get_transaction_receipt(tx_hash)
+    print(f"实际Gas Used: {receipt.gasUsed}")
     def collect_func_info(item, depth=0):
+        if item is None:
+            return
         action = item.get("action", {})
         result = item.get("result", {})
-        func_info = action.get("resolvedFunction", {})
-        fn_name = func_info.get("name") 
+        func_info = action.get("resolvedFunction", {}) or {}
+        fn_name = func_info.get("name", "") if func_info else ""
         gas_alloc = hex_to_int(action.get("gas", "0x0"))
         gas_used = hex_to_int(result.get("gasUsed", "0x0"))
         gas_remain = (gas_alloc - gas_used) if gas_alloc is not None and gas_used is not None else None
         call_type = (action.get("callType", "") or "").lower()
-        if call_type != "staticcall":
-            call_trace.append({
-                "depth": depth,
-                "from": action.get("from", "").lower(),
-                "to": action.get("to", "").lower(),
-                "call_type": call_type,
-                "function": fn_name,
-                "gas_allocated": gas_alloc,
-                "gas_used": gas_used,
-                "gas_remaining": gas_remain
-            })
+        call_trace.append({
+            "depth": depth,
+            "from": action.get("from", "").lower(),
+            "to": action.get("to", "").lower(),
+            "call_type": call_type,
+            "function": fn_name,
+            "gas_allocated": gas_alloc,
+            "gas_used": gas_used,
+            "gas_remaining": gas_remain
+        })
         for sub in item.get("subtraces", []):
             collect_func_info(sub, depth+1)
 
-    collect_func_info(trace_data)
+    # collect_func_info(item=trace_data)
+    if trace_data:
+        collect_func_info(item=trace_data)
+    else:
+        print("✗ No trace data to analyze")
 
     df_call_trace = pd.DataFrame(call_trace)
     df_call_trace = df_call_trace[[
@@ -153,11 +159,14 @@ def run_transaction_analysis(tx_hash, tx_dir):
 
     print(f"Found {len(involved_addresses)} contract addresses")
 
-    fetcher = ContractFetcher(api_key=etherscan_api)
+    fetcher = ContractFetcher(chain_id, api_key=etherscan_api)
     tool = ContractDecompilerTool(fetcher)
+    contract_names = {}
     for addr in sorted(involved_addresses):
         try:
-            tool.run(addr)
+            contract_name = tool.run(addr)
+            if contract_name:
+                contract_names[addr] = contract_name
         except Exception as e:
             print(f"Failed to process {addr}: {e}")
 
@@ -176,44 +185,36 @@ def run_transaction_analysis(tx_hash, tx_dir):
     for _, row in df_call_trace.iterrows():
         if pd.notna(row['function']): 
             called_functions.add((
-                row['depth'],
-                row['from'].lower().replace("0x", ""),
                 row['to'].lower().replace("0x", ""),
                 row['function']
             ))
     # === Step 6: Extract Function Code ===
-    def get_main_contract_file(contract_address):
-        url = f"{etherscan_api_url}?module=contract&action=getsourcecode&address=0x{contract_address}&apikey={etherscan_api}"
-        try:
-            response = requests.get(url)
-            data = response.json()
-            if data['status'] == '1' and data['result']:
-                source_info = data['result'][0]
-                if 'ContractName' in source_info and source_info['ContractName']:
-                    contract_name = source_info['ContractName']
-                    return f"{contract_name}.sol"
-        except Exception as e:
-            print(f"Error fetching main contract for {contract_address}: {e}")
-        return None
+    # def get_main_contract_file(contract_address):
+    #     url = f"{etherscan_api_url}?module=contract&action=getsourcecode&address=0x{contract_address}&apikey={etherscan_api}"
+    #     try:
+    #         response = requests.get(url)
+    #         data = response.json()
+    #         if data['status'] == '1' and data['result']:
+    #             source_info = data['result'][0]
+    #             if 'ContractName' in source_info and source_info['ContractName']:
+    #                 contract_name = source_info['ContractName']
+    #                 return f"{contract_name}.sol"
+    #     except Exception as e:
+    #         print(f"Error fetching main contract for {contract_address}: {e}")
+    #     return None
     Path(os.path.dirname(OUTPUT_CODE_PATH)).mkdir(parents=True, exist_ok=True)
-    written_funcs = set()
     buffer = []
 
-    for depth, from_addr, to_addr, func in called_functions:
-        addr = to_addr  
-        if (addr, func) in written_funcs:
-            continue
-        
+    for addr, func in called_functions:      
         contract_path = os.path.join(CONTRACTS_DIR, addr)
         if not os.path.isdir(contract_path):
-            buffer.append(f"\n// Contract directory not found for address {addr}\n")
-            written_funcs.add((addr, func))
+            buffer.append(f"\n< Contract directory not found for address {addr} >\n")
             continue
         
-        main_contract_file = get_main_contract_file(addr)
+        main_contract_file = contract_names.get(addr, f"{addr}.sol")
         matched = False
         
-        if main_contract_file:
+        if os.path.exists(os.path.join(contract_path, main_contract_file)):
             file_path = os.path.join(contract_path, main_contract_file)
             if os.path.exists(file_path):
                 with open(file_path, "r", encoding="utf-8") as f:
@@ -221,10 +222,9 @@ def run_transaction_analysis(tx_hash, tx_dir):
                 pattern = rf"(function\s+{re.escape(func)}\s*\(.*?\)[\s\S]*?\{{[\s\S]*?\n\}})"
                 matches = re.findall(pattern, code, re.IGNORECASE)
                 if matches:
-                    buffer.append(f"\n// Function from {addr} - {func} in {main_contract_file} \n")
+                    buffer.append(f"\n< Function from {addr} - {func} in {main_contract_file} >\n")
                     buffer.append(matches[0])
                     buffer.append("\n")
-                    written_funcs.add((addr, func))
                     matched = True
         
         # search other files
@@ -241,16 +241,13 @@ def run_transaction_analysis(tx_hash, tx_dir):
                 matches = re.findall(pattern, code, re.IGNORECASE)
                 
                 if matches:
-                    buffer.append(f"\n// Function from {addr} - {func} in {file} \n")
+                    buffer.append(f"\n< Function from {addr} - {func} in {file} >\n")
                     buffer.append(matches[0])
                     buffer.append("\n")
-                    written_funcs.add((addr, func))
                     matched = True
                     break
-        
-        if not matched:
-            buffer.append(f"\n// Function {func} not found in {addr}\n")
-            written_funcs.add((addr, func))
+        if not matches:
+            buffer.append(f"\n< Function {func} not found in {addr} >\n")
     # with open(OUTPUT_CODE_PATH, "w", encoding="utf-8") as output_file:
     # for addr, func in sorted(called_functions):
     #     if (addr, func) in written_funcs:
@@ -291,19 +288,14 @@ def run_transaction_analysis(tx_hash, tx_dir):
         output_file.write(clean)
 
     # === Step 7: Asset Flow Analysis ===
-    if tx_dir:
-        try:
-            # get chain_id
-            path_parts = tx_dir.split(os.sep)
-            if len(path_parts) >= 2 and path_parts[0] == "output":
-                chain_id_str = path_parts[1]  
-                chain_id = int(chain_id_str)
-            else:
-                chain_id = 1 
-        except (ValueError, IndexError):
-            chain_id = 1  
-    else:
-        chain_id = 1 
+    # if tx_dir:
+    #         # get chain_id
+    #         path_parts = tx_dir.split(os.sep)
+    #         if len(path_parts) >= 2 and path_parts[0] == "output":
+    #             chain_id_str = path_parts[1]  
+    #             chain_id = int(chain_id_str) 
+    # else:
+    #     chain_id = 1 
 
     def collect_transfers(trace_item, transfers):
         native_token_map = {
@@ -388,6 +380,7 @@ def run_transaction_analysis(tx_hash, tx_dir):
             symbol = contract.functions.symbol().call()
         except:
             symbol = "N/A"
+            
         try:
             decimals = contract.functions.decimals().call()
         except:
@@ -408,7 +401,7 @@ def run_transaction_analysis(tx_hash, tx_dir):
     for tx in transfers:
         # if tx["token_address"] == "ETH":
         #     meta = {"name": "Ether", "symbol": "ETH", "decimals": 18}
-        if tx["token_address"] in ["ETH", "BNB", "POL", "S", "SEI", "FIL"]:
+        if not tx["token_address"].startswith("0x"):
             meta_config = native_token_meta.get(chain_id, native_token_meta[1])
             meta = {
                 "name": meta_config["name"],
@@ -418,14 +411,14 @@ def run_transaction_analysis(tx_hash, tx_dir):
         else:
             meta = get_token_info(tx["token_address"])
         tx.update(meta)
-        tx["value_normalized"] = tx["value"] / (10 ** meta["decimals"])
+        tx["value"] = tx["value"] / (10 ** meta["decimals"])
 
 
     # Save asset flows
-    if transfers:
-        df_assets = pd.DataFrame(transfers)
-        df_assets = df_assets[["token_address", "name", "symbol", "from", "to", "value_normalized"]]
-        df_assets.to_csv(ASSET_FLOWS_PATH, index=False)
+    # if transfers:
+    df_assets = pd.DataFrame(transfers)
+    df_assets = df_assets[["token_address", "name", "symbol", "from", "to", "value"]]
+    df_assets.to_csv(ASSET_FLOWS_PATH, index=False)
 
     # === Step 9: State Changes Analysis ===
     state_changes = defaultdict(list)
@@ -560,7 +553,7 @@ def main():
     
     try:
         # Step 1: Run transaction analysis
-        success = run_transaction_analysis(tx_hash, tx_dir)
+        success = run_transaction_analysis(tx_hash, tx_dir, chain_id=1)
         if not success:
             print("Transaction analysis failed")
             return
