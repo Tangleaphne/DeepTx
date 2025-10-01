@@ -1,25 +1,25 @@
 {
-  "risk_level": "safe",
-  "confidence_score": 95,
+  "risk_level": "suspicious",
+  "confidence_score": 75,
   "custom_scoring_criteria": {
-    "behavior_patterns": 0.6,
+    "behavior_patterns": 0.4,
     "gas_efficiency": 0.3,
-    "ui_security": 0.1
+    "ui_security": 0.3
   },
-  "explanation": "The transaction involves transfers of Ether, USD Coin, and Wrapped Ether among multiple addresses. Smart contract functions for token transfers and state changes are executed. Gas usage is relatively efficient. No suspicious JavaScript code is present.",
+  "explanation": "The transaction involves multiple asset transfers and state changes, including approvals and delegate calls. Gas usage efficiency is relatively low. No JavaScript code present.",
   "recommendations": [
-    "Monitor the state changes in the smart contract for any unexpected alterations",
-    "Verify the legitimacy of the asset transfers and the involved addresses",
-    "Continue to monitor for any abnormal behavior in future transactions"
+    "Review the behavior patterns and functions involved in the transaction for any potential risks",
+    "Monitor the gas usage efficiency and consider optimizing gas costs",
+    "Continue to monitor for any changes or additions to the transaction logic"
   ],
   "category_analysis": {
-    "behavior_score": 85,
-    "context_score": 95,
-    "ui_score": 100
+    "behavior_score": 70,
+    "context_score": 60,
+    "ui_score": 80
   },
   "analysis_metadata": {
     "model": "gpt-3.5-turbo",
-    "analysis_time_seconds": 3.33,
-    "timestamp": "2025-09-19 20:21:00"
+    "analysis_time_seconds": 2.6,
+    "timestamp": "2025-10-01 18:10:44"
   }
 }

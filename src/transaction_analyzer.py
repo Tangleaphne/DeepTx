@@ -36,7 +36,6 @@ def run_transaction_analysis(tx_hash, tx_dir, chain_id):
     
     TRACE_PATH = os.path.join(tx_dir, "decoded_trace.json")
     # TRACE_TXT_PATH = os.path.join(tx_dir, "trace.txt")
-    CONTRACTS_DIR = "contracts"
     OUTPUT_CODE_PATH = os.path.join(tx_dir, "code.txt")
     ASSET_FLOWS_PATH = os.path.join(tx_dir, "asset_flows.csv")
     CALL_TRACE_PATH = os.path.join(tx_dir, "call_trace.csv")
@@ -206,7 +205,7 @@ def run_transaction_analysis(tx_hash, tx_dir, chain_id):
     buffer = []
 
     for addr, func in called_functions:      
-        contract_path = os.path.join(CONTRACTS_DIR, addr)
+        contract_path = os.path.join(tx_dir, addr)
         if not os.path.isdir(contract_path):
             buffer.append(f"\n< Contract directory not found for address {addr} >\n")
             continue
