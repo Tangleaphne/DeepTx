@@ -23,10 +23,10 @@ def run_transaction_analysis(tx_hash, tx_dir, chain_id):
     """Run comprehensive transaction analysis (analyze.py functionality)"""
 
     # === Configurations ===
-    # api_key = os.environ.get("HEIMDALL_API_KEY")
-    api_key = os.environ.get("HEIMDALL_API_KEY")
+    # api_key = os.environ.get("TRANSPOSE_API_KEY")
+    api_key = os.environ.get("TRANSPOSE_API_KEY")
     if not api_key:
-        raise ValueError("HEIMDALL_API_KEY environment variable is required")
+        raise ValueError("TRANSPOSE_API_KEY environment variable is required")
     
     rpc_url = os.environ.get("RPC_URL", "https://ethereum.therpc.io")
     etherscan_api_url = os.environ.get("ETHERSCAN_API_URL")
@@ -205,9 +205,9 @@ def run_transaction_analysis(tx_hash, tx_dir, chain_id):
     buffer = []
 
     for addr, func in called_functions:      
-        contract_path = os.path.join(tx_dir, addr)
+        contract_path = os.path.join(tx_dir, "contracts", addr)
         if not os.path.isdir(contract_path):
-            buffer.append(f"\n< Contract directory not found for address {addr} >\n")
+            buffer.append(f"\n< Proxy contract {addr}, skipping code analysis >\n")
             continue
         
         main_contract_file = contract_names.get(addr, f"{addr}.sol")

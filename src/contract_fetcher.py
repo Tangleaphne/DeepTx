@@ -123,7 +123,7 @@ class ContractDecompilerTool:
         self.fetcher = fetcher
 
     def save_multi_file_source(self, contract_address, sources_dict):
-        base_path = f"{self.fetcher.tx_dir}/{contract_address}/"
+        base_path = f"{self.fetcher.tx_dir}/contracts/{contract_address}/"
         os.makedirs(base_path, exist_ok=True)
         for filename, content_info in sources_dict.items():
             clean_filename = filename.replace("@", "").replace("/", "_")
@@ -136,7 +136,7 @@ class ContractDecompilerTool:
         contract_address = contract_address.lower().replace("0x", "")
         print(f"[*] Checking contract: 0x{contract_address}")
 
-        output_dir = f"{self.fetcher.tx_dir}/{contract_address}/"
+        output_dir = f"{self.fetcher.tx_dir}/contracts/{contract_address}/"
         if os.path.exists(output_dir):
             existing_files = [
                 f for f in os.listdir(output_dir) 
@@ -179,7 +179,7 @@ class ContractDecompilerTool:
                 print("[!] Failed to fetch bytecode. Abort.")
                 return None
 
-            output_dir = f"{self.fetcher.tx_dir}/{contract_address}/"
+            output_dir = f"{self.fetcher.tx_dir}/contracts/{contract_address}/"
             os.makedirs(output_dir, exist_ok=True)
             bytecode_file = f"{output_dir}{contract_address}.bin"
             with open(bytecode_file, "w") as f:

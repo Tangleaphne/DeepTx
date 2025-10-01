@@ -35,7 +35,7 @@ pip install -r requirements.txt
 
 3. Configure environment variables via .env (required):
 ```bash
-Transpose_Api_Key="your_heimdall_api_key" # Optional, https://docs.transpose.io/quickstart/
+Transpose_Api_Key="your_transpose_api_key" # Optional, https://docs.transpose.io/quickstart/
 RPC_URL="your_ethereum_rpc_url"
 ETHERSCAN_API_KEY="your_etherscan_api_key"
 OPENAI_API_KEY="your_openai_api_key"
@@ -184,7 +184,7 @@ Tenderly API integration for transaction simulation and analysis.
 
 ### Environment Variables
 
-- `HEIMDALL_API_KEY`: API key for Heimdall service (required)
+- `TRANSPOSE_API_KEY`: API key for Heimdall service (required)
 - `RPC_URL`: Ethereum RPC endpoint (optional, defaults to public endpoint)
 - `ETHERSCAN_API_KEY`: Etherscan API key for contract fetching (required)
 - `OPENAI_API_KEY`: OpenAI API key for LLM analysis (required)

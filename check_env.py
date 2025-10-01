@@ -12,7 +12,7 @@ import sys
 def check_environment():
     """Check if all required environment variables are set."""
     required_vars = [
-        "HEIMDALL_API_KEY",
+        "TRANSPOSE_API_KEY",
         "ETHERSCAN_API_KEY", 
         "OPENAI_API_KEY"
     ]

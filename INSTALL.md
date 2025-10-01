@@ -18,7 +18,7 @@ pip install -r requirements.txt
 ### 3. Set Environment Variables
 
 ```bash
-export HEIMDALL_API_KEY="your_heimdall_api_key"
+export TRANSPOSE_API_KEY="your_transpose_api_key"
 export RPC_URL="https://ethereum.therpc.io"
 export ETHERSCAN_API_KEY="your_etherscan_api_key"
 export OPENAI_API_KEY="your_openai_api_key"
