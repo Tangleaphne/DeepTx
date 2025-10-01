@@ -10,6 +10,7 @@ import sys
 import json
 import time
 import subprocess
+import pandas as pd
 import requests
 from typing import Dict, Any, List
 from dotenv import load_dotenv, find_dotenv
@@ -229,14 +230,28 @@ def run_llm_analysis(tx_hash: str, tx_dir: str) -> Dict[str, Any]:
         return {}
 
 
-def analyze_transaction_type(tx_hash: str) -> str:
+def analyze_transaction_type(tx_dir: str) -> str:
     """Analyze transaction type"""
     try:
         # This can be enhanced to determine type based on transaction data
-        # For now, return generic type
-        return "Smart Contract Interaction"
-    except:
+        call_trace_path = os.path.join(tx_dir, "call_trace.csv")
+        df_call_trace = pd.read_csv(call_trace_path)
+        if df_call_trace.empty:
+            return "User Transfer"    
+        has_contract_calls = any(df_call_trace['depth'] > 0)
+        has_function_calls = any(df_call_trace['function'].notna() & (df_call_trace['function'] != ""))    
+        if has_contract_calls or has_function_calls:
+            return "Smart Contract Interaction"
+        else:
+            return "User Transfer"
+            
+    except Exception as e:
+        print(f"Error analyzing transaction type: {e}")
         return "Unknown"
+    #     # For now, return generic type
+    #     return "Smart Contract Interaction"
+    # except:
+    #     return "Unknown"
 
 
 def generate_final_report(tx_hash: str, tx_dir: str, llm_results: Dict[str, Any]) -> Dict[str, Any]:
@@ -257,7 +272,7 @@ def generate_final_report(tx_hash: str, tx_dir: str, llm_results: Dict[str, Any]
         print_substep("Analyzing transaction type and classification...", False)
         
         # Determine transaction type
-        tx_type = analyze_transaction_type(tx_hash)
+        tx_type = analyze_transaction_type(tx_dir)
         
         print_substep("Analyzing transaction type and classification...", True)
         print_substep("Synthesizing security assessment and recommendations...", False)
