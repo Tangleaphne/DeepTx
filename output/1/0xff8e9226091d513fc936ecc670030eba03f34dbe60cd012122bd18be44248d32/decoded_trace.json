@@ -78,7 +78,7 @@
           "blockNumber": 22874010,
           "transactionHash": "0xff8e9226091d513fc936ecc670030eba03f34dbe60cd012122bd18be44248d32",
           "transactionIndex": 0,
-          "logIndex": 0,
+          "logIndex": 4294967222,
           "removed": false
         }
       ],
@@ -144,7 +144,7 @@
           "blockNumber": 22874010,
           "transactionHash": "0xff8e9226091d513fc936ecc670030eba03f34dbe60cd012122bd18be44248d32",
           "transactionIndex": 0,
-          "logIndex": 1,
+          "logIndex": 4294967223,
           "removed": false
         }
       ],
@@ -244,7 +244,7 @@
               "blockNumber": 22874010,
               "transactionHash": "0xff8e9226091d513fc936ecc670030eba03f34dbe60cd012122bd18be44248d32",
               "transactionIndex": 0,
-              "logIndex": 2,
+              "logIndex": 4294967224,
               "removed": false
             }
           ],
@@ -314,7 +314,7 @@
           "blockNumber": 22874010,
           "transactionHash": "0xff8e9226091d513fc936ecc670030eba03f34dbe60cd012122bd18be44248d32",
           "transactionIndex": 0,
-          "logIndex": 3,
+          "logIndex": 4294967225,
           "removed": false
         }
       ],
@@ -447,7 +447,7 @@
               "blockNumber": 22874010,
               "transactionHash": "0xff8e9226091d513fc936ecc670030eba03f34dbe60cd012122bd18be44248d32",
               "transactionIndex": 0,
-              "logIndex": 4,
+              "logIndex": 4294967226,
               "removed": false
             }
           ],
@@ -517,7 +517,7 @@
           "blockNumber": 22874010,
           "transactionHash": "0xff8e9226091d513fc936ecc670030eba03f34dbe60cd012122bd18be44248d32",
           "transactionIndex": 0,
-          "logIndex": 5,
+          "logIndex": 4294967227,
           "removed": false
         }
       ],
@@ -2029,7 +2029,7 @@
                   "blockNumber": 22874010,
                   "transactionHash": "0xff8e9226091d513fc936ecc670030eba03f34dbe60cd012122bd18be44248d32",
                   "transactionIndex": 0,
-                  "logIndex": 7,
+                  "logIndex": 4294967229,
                   "removed": false
                 }
               ],
@@ -3719,7 +3719,7 @@
                       "blockNumber": 22874010,
                       "transactionHash": "0xff8e9226091d513fc936ecc670030eba03f34dbe60cd012122bd18be44248d32",
                       "transactionIndex": 0,
-                      "logIndex": 8,
+                      "logIndex": 4294967230,
                       "removed": false
                     }
                   ],
@@ -4105,7 +4105,7 @@
                               "blockNumber": 22874010,
                               "transactionHash": "0xff8e9226091d513fc936ecc670030eba03f34dbe60cd012122bd18be44248d32",
                               "transactionIndex": 0,
-                              "logIndex": 9,
+                              "logIndex": 4294967231,
                               "removed": false
                             }
                           ],
@@ -4231,7 +4231,7 @@
                   "blockNumber": 22874010,
                   "transactionHash": "0xff8e9226091d513fc936ecc670030eba03f34dbe60cd012122bd18be44248d32",
                   "transactionIndex": 0,
-                  "logIndex": 10,
+                  "logIndex": 4294967232,
                   "removed": false
                 }
               ],
@@ -13434,7 +13434,7 @@
           "blockNumber": 22874010,
           "transactionHash": "0xff8e9226091d513fc936ecc670030eba03f34dbe60cd012122bd18be44248d32",
           "transactionIndex": 0,
-          "logIndex": 6,
+          "logIndex": 4294967228,
           "removed": false
         }
       ],

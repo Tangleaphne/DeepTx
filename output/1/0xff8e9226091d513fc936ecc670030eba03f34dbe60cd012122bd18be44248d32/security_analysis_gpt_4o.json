@@ -2,33 +2,24 @@
   "risk_level": "safe",
   "confidence_score": 85,
   "custom_scoring_criteria": {
-    "behavior_patterns": {
-      "weight": 0.5,
-      "reasoning": "Behavior patterns are crucial for identifying potential security risks. The call chain complexity and asset movements are analyzed to ensure no suspicious functions or abnormal asset flows are present."
-    },
-    "gas_efficiency_and_usage_patterns": {
-      "weight": 0.3,
-      "reasoning": "Gas efficiency is important for understanding transaction cost-effectiveness and potential inefficiencies. The transaction shows low gas efficiency but no signs of malicious activity."
-    },
-    "ui_javascript_security_indicators": {
-      "weight": 0.2,
-      "reasoning": "JavaScript security indicators are less relevant here due to the absence of UI analysis and JavaScript code. However, it is still considered for completeness."
-    }
+    "behavior_patterns": 0.5,
+    "gas_efficiency_and_usage_patterns": 0.3,
+    "ui_javascript_security_indicators": 0.2
   },
-  "explanation": "This transaction involves multiple asset approvals and transfers between addresses, primarily focusing on token management functions. The call chain and asset flows appear normal, with no suspicious patterns detected in the code or transaction logic.",
+  "explanation": "This transaction involves multiple asset approvals and transfers, including USDC and WETH, with no suspicious function calls or abnormal patterns detected. The transaction does not involve any JavaScript code, and no malicious addresses or code patterns were found.",
   "recommendations": [
-    "Monitor future transactions for any changes in behavior patterns.",
-    "Ensure all involved addresses are verified and trusted.",
-    "Consider optimizing gas usage for better efficiency."
+    "Monitor the involved addresses for any future suspicious activity.",
+    "Ensure that the contracts involved are from trusted sources.",
+    "Regularly update security tools and databases to detect new threats."
   ],
   "category_analysis": {
     "behavior_score": 90,
-    "context_score": 70,
-    "ui_score": 80
+    "context_score": 75,
+    "ui_score": 100
   },
   "analysis_metadata": {
     "model": "gpt-4o",
-    "analysis_time_seconds": 5.1,
-    "timestamp": "2025-10-01 19:52:36"
+    "analysis_time_seconds": 7.85,
+    "timestamp": "2025-10-02 10:30:32"
   }
 }

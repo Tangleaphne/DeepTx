@@ -143,10 +143,10 @@ def run_transaction_analysis(tx_hash, tx_dir, chain_id):
     buffer = []
 
     for addr, func in called_functions:      
-        contract_path = os.path.join(tx_dir, "contracts", addr)
-        if not os.path.isdir(contract_path):
-            buffer.append(f"\n< Proxy contract {addr}, skipping code analysis >\n")
-            continue
+        contract_path = os.path.join(os.path.dirname(tx_dir), "contracts", addr)
+        # if not os.path.isdir(contract_path):
+        #     buffer.append(f"\n< Proxy contract {addr}, skipping code analysis >\n")
+        #     continue
         
         main_contract_file = contract_names.get(addr, f"{addr}.sol")
         matched = False
@@ -273,15 +273,18 @@ def run_transaction_analysis(tx_hash, tx_dir, chain_id):
         contract = w3.eth.contract(address=Web3.to_checksum_address(addr), abi=abi)
         try:
             name = contract.functions.name().call()
+            time.sleep(1)
         except:
             name = "N/A"
         try:
             symbol = contract.functions.symbol().call()
+            time.sleep(1)
         except:
             symbol = "N/A"
             
         try:
             decimals = contract.functions.decimals().call()
+            time.sleep(1)
         except:
             decimals = 18
         token_meta[addr] = {"name": name, "symbol": symbol, "decimals": decimals}
