@@ -144,9 +144,8 @@ def run_transaction_analysis(tx_hash, tx_dir, chain_id):
 
     for addr, func in called_functions:      
         contract_path = os.path.join(os.path.dirname(tx_dir), "contracts", addr)
-        # if not os.path.isdir(contract_path):
-        #     buffer.append(f"\n< Proxy contract {addr}, skipping code analysis >\n")
-        #     continue
+        if not os.path.exists(contract_path):
+            continue
         
         main_contract_file = contract_names.get(addr, f"{addr}.sol")
         matched = False
