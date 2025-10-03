@@ -113,9 +113,12 @@ def run_transaction_analysis(tx_hash, tx_dir, chain_id):
 
     # === Step 4: Fetch Contracts ===   
     df_call_trace = pd.read_csv(CALL_TRACE_PATH)
+    from_addresses = df_call_trace["from"].dropna()
+    to_addresses = df_call_trace["to"].dropna()
     involved_addresses = set()
-    involved_addresses.update(df_call_trace["from"].str.lower().unique())
-    involved_addresses.update(df_call_trace["to"].str.lower().unique())
+    involved_addresses.update(from_addresses.str.lower().unique())
+    if not to_addresses.empty:
+        involved_addresses.update(to_addresses.str.lower().unique())
 
     print(f"Found {len(involved_addresses)} contract addresses")
 
@@ -314,9 +317,10 @@ def run_transaction_analysis(tx_hash, tx_dir, chain_id):
 
 
     # Save asset flows
-    df_assets = pd.DataFrame(transfers)
-    df_assets = df_assets[["token_address", "name", "symbol", "from", "to", "value"]]
-    df_assets.to_csv(ASSET_FLOWS_PATH, index=False)
+    if transfers:
+        df_assets = pd.DataFrame(transfers)
+        df_assets = df_assets[["token_address", "name", "symbol", "from", "to", "value"]]
+        df_assets.to_csv(ASSET_FLOWS_PATH, index=False)
 
     # === Step 9: State Changes Analysis ===
     state_changes = defaultdict(list)

@@ -230,16 +230,62 @@ def run_llm_analysis(tx_hash: str, tx_dir: str) -> Dict[str, Any]:
         return {}
 
 
+# def analyze_transaction_type(tx_dir: str) -> str:
+#     """Analyze transaction type"""
+#     try:
+#         # This can be enhanced to determine type based on transaction data
+#         call_trace_path = os.path.join(tx_dir, "call_trace.csv")
+#         df_call_trace = pd.read_csv(call_trace_path)
+#         if df_call_trace.empty:
+#             return "User Transfer"    
+#         has_contract_calls = any(df_call_trace['depth'] > 0)
+#         has_function_calls = any(df_call_trace['function'].notna() & (df_call_trace['function'] != ""))    
+#         if has_contract_calls or has_function_calls:
+#             return "Smart Contract Interaction"
+#         else:
+#             return "User Transfer"
+            
+#     except Exception as e:
+#         print(f"Error analyzing transaction type: {e}")
+#         return "Unknown"
 def analyze_transaction_type(tx_dir: str) -> str:
-    """Analyze transaction type"""
+    """Analyze transaction type with detailed contract creation detection"""
     try:
-        # This can be enhanced to determine type based on transaction data
         call_trace_path = os.path.join(tx_dir, "call_trace.csv")
         df_call_trace = pd.read_csv(call_trace_path)
+        
         if df_call_trace.empty:
-            return "User Transfer"    
+            return "User Transfer"
+    
+        first_row = df_call_trace.iloc[0]
+        is_contract_creation = False
+        
+        if pd.isna(first_row.get('to')) or first_row.get('to') in ['', '0x', '0x0', None]:
+            is_contract_creation = True
+        
+        if 'call_type' in first_row and pd.notna(first_row['call_type']):
+            if any(keyword in str(first_row['call_type']).lower() for keyword in ['create', 'delegate', 'init']):
+                is_contract_creation = True
+        
+        if 'input' in first_row and pd.notna(first_row['input']):
+            if len(str(first_row['input'])) > 2000:  #usual
+                is_contract_creation = True
+        
+        if not is_contract_creation:
+            empty_to = df_call_trace['to'].isna().any() or (df_call_trace['to'] == '').any()
+            
+            if 'call_type' in df_call_trace.columns:
+                create_calls = df_call_trace['call_type'].str.contains(
+                    'create|delegatecall|callcode', case=False, na=False
+                ).any()
+                is_contract_creation = empty_to or create_calls
+        
+        if is_contract_creation:
+            return "Contract Creation"
+        
         has_contract_calls = any(df_call_trace['depth'] > 0)
-        has_function_calls = any(df_call_trace['function'].notna() & (df_call_trace['function'] != ""))    
+        has_function_calls = any(df_call_trace['function'].notna() & (df_call_trace['function'] != ""))
+        
         if has_contract_calls or has_function_calls:
             return "Smart Contract Interaction"
         else:
@@ -276,6 +322,11 @@ def generate_final_report(tx_hash: str, tx_dir: str, llm_results: Dict[str, Any]
         
         print_substep("Analyzing transaction type and classification...", True)
         print_substep("Synthesizing security assessment and recommendations...", False)
+
+        if tx_type == "Contract Creation":
+            explanation = "Contract creation transaction - deploying new smart contract to the blockchain"
+        else:
+            explanation = consensus_result.get("explanation", "")
         
         # Generate final report
         final_report = {
@@ -290,7 +341,7 @@ def generate_final_report(tx_hash: str, tx_dir: str, llm_results: Dict[str, Any]
                 "consensus_method": consensus_result.get("consensus_metadata", {}).get("method", "unknown")
             },
             "transaction_analysis": {
-                "explanation": consensus_result.get("explanation", ""),
+                "explanation": explanation,
                 "scoring_criteria": consensus_result.get("custom_scoring_criteria", "")
             },
             "recommendations": consensus_result.get("recommendations", [])
