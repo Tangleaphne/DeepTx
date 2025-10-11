@@ -271,14 +271,14 @@ def analyze_transaction_type(tx_dir: str) -> str:
             if len(str(first_row['input'])) > 2000:  #usual
                 is_contract_creation = True
         
-        if not is_contract_creation:
-            empty_to = df_call_trace['to'].isna().any() or (df_call_trace['to'] == '').any()
+        # if not is_contract_creation:
+        #     empty_to = df_call_trace['to'].isna().any() or (df_call_trace['to'] == '').any()
             
-            if 'call_type' in df_call_trace.columns:
-                create_calls = df_call_trace['call_type'].str.contains(
-                    'create|delegatecall|callcode', case=False, na=False
-                ).any()
-                is_contract_creation = empty_to or create_calls
+        #     if 'call_type' in df_call_trace.columns:
+        #         create_calls = df_call_trace['call_type'].str.contains(
+        #             'create|delegatecall|callcode', case=False, na=False
+        #         ).any()
+        #         is_contract_creation = empty_to or create_calls
         
         if is_contract_creation:
             return "Contract Creation"
