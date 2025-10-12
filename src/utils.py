@@ -1,32 +1,18 @@
 from typing import List, Dict
 
 def extract_call_trace_recursive(call_trace: dict, depth: int = 0, traces: List[Dict] = None) -> List[Dict]:
-    """
-    Recursively extract call trace information
-    
-    Args:
-        call_trace: Call trace object
-        depth: Current call depth
-        traces: List to accumulate trace records
-    
-    Returns:
-        List of call trace records
-    """
     if traces is None:
         traces = []
     
-    # Extract current call information
     from_addr = call_trace.get('from', '')
     to_addr = call_trace.get('to', '')
     call_type = call_trace.get('call_type', '')
     function_name = call_trace.get('function_name', '') or call_trace.get('function_selector', '')
     
-    # Gas information
     gas = call_trace.get('gas', 0)
     gas_used = call_trace.get('gas_used', 0)
     gas_remaining = gas - gas_used if gas and gas_used else 0
     
-    # Add current call to traces
     traces.append({
         'depth': depth,
         'from': from_addr,
@@ -38,7 +24,7 @@ def extract_call_trace_recursive(call_trace: dict, depth: int = 0, traces: List[
         'gas_remaining': gas_remaining
     })
     
-    # Process nested calls (subcalls)
+    # Process subcalls
     calls = call_trace.get('calls')
     if calls and isinstance(calls, list):
         for subcall in calls:
@@ -46,64 +32,36 @@ def extract_call_trace_recursive(call_trace: dict, depth: int = 0, traces: List[
     
     return traces
 
-
 def extract_all_call_traces(result: dict, exclude_types: List[str] = None) -> List[Dict]:
-    """
-    Extract all call traces from simulation result
-    
-    Args:
-        result: Simulation result JSON
-        exclude_types: List of call types to exclude (e.g., ['JUMPDEST', 'STATICCALL'])
-    
-    Returns:
-        List of all call trace records
-    """
     traces = []
     
-    # Get the main call trace
     call_trace = result.get('transaction', {}).get('transaction_info', {}).get('call_trace')
     
     if call_trace is None:
         return traces
     
-    # Extract traces recursively starting from depth 0
     traces = extract_call_trace_recursive(call_trace, depth=0)
     
-    # Filter out excluded call types
     if exclude_types:
         traces = [t for t in traces if t['call_type'] not in exclude_types]
     
     return traces
 
 def extract_transfer_events(result: dict) -> List[Dict]:
-    """
-    Extract Transfer events from simulation result
-    
-    Args:
-        result: Simulation result JSON
-    
-    Returns:
-        List of transfer records
-    """
     transfers = []
     
-    # Check if transaction succeeded
     if not result.get('transaction', {}).get('status', False):
         return transfers
     
-    # Extract from logs
     logs = result.get('transaction', {}).get('transaction_info', {}).get('logs')
     
-    # Handle null logs
     if logs is None:
         return transfers
     
     for log in logs:
-        # Look for Transfer events (ERC20/ERC721)
         if log.get('name') == 'Transfer':
             inputs = log.get('inputs', [])
             
-            # Parse inputs
             from_addr = None
             to_addr = None
             value = None
@@ -119,14 +77,13 @@ def extract_transfer_events(result: dict) -> List[Dict]:
                 elif param_name in ['value', 'amount', 'tokenid']:
                     value = param_value
             
-            # Get token contract address
             token_address = log.get('raw', {}).get('address', '')
             
             if from_addr and to_addr and value:
                 transfers.append({
                     'token_address': token_address,
-                    'name': '',  # Will be filled if available
-                    'symbol': '',  # Will be filled if available
+                    'name': '',  
+                    'symbol': '',  
                     'from': from_addr,
                     'to': to_addr,
                     'value': str(value)
@@ -136,24 +93,13 @@ def extract_transfer_events(result: dict) -> List[Dict]:
 
 
 def extract_eth_transfers(result: dict) -> List[Dict]:
-    """
-    Extract ETH transfers from balance_diff
-    
-    Args:
-        result: Simulation result JSON
-    
-    Returns:
-        List of ETH transfer records
-    """
     transfers = []
     
     balance_diff = result.get('transaction', {}).get('transaction_info', {}).get('balance_diff')
     
-    # Handle null balance_diff
     if balance_diff is None:
         return transfers
     
-    # Group balance changes to identify transfers
     balance_changes = {}
     for change in balance_diff:
         addr = change.get('address', '')
@@ -164,7 +110,6 @@ def extract_eth_transfers(result: dict) -> List[Dict]:
         if diff != 0 and not change.get('is_miner', False):
             balance_changes[addr] = diff
     
-    # Match decreases with increases
     decreases = {addr: -diff for addr, diff in balance_changes.items() if diff < 0}
     increases = {addr: diff for addr, diff in balance_changes.items() if diff > 0}
     
@@ -172,7 +117,7 @@ def extract_eth_transfers(result: dict) -> List[Dict]:
         for to_addr, recv_amount in increases.items():
             if amount == recv_amount:
                 transfers.append({
-                    'token_address': '0x0000000000000000000000000000000000000000',  # ETH
+                    'token_address': '0x0000000000000000000000000000000000000000',  
                     'name': 'Ethereum',
                     'symbol': 'ETH',
                     'from': from_addr,
@@ -185,33 +130,21 @@ def extract_eth_transfers(result: dict) -> List[Dict]:
 
 
 def extract_asset_changes(result: dict) -> List[Dict]:
-    """
-    Extract asset changes from Tenderly's asset_changes field
-    
-    Args:
-        result: Simulation result JSON
-    
-    Returns:
-        List of asset transfer records
-    """
     transfers = []
     
     asset_changes = result.get('transaction', {}).get('transaction_info', {}).get('asset_changes')
     
-    # Handle null asset_changes
     if asset_changes is None:
         return transfers
     
     for change in asset_changes:
         change_type = change.get('type', '').upper()
         
-        # Handle different asset types
         if change_type in ['TRANSFER', 'ERC20_TRANSFER', 'ERC721_TRANSFER', 'ERC1155_TRANSFER']:
             token_info = change.get('token_info', {})
             
-            # Get token address from multiple possible locations
             token_address = (
-                token_info.get('contract_address', '') or  # Most common location
+                token_info.get('contract_address', '') or 
                 change.get('token_address', '') or 
                 change.get('asset', '')
             )

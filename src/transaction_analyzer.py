@@ -11,9 +11,6 @@ from .heimdall_client import inspect_transaction
 from .contract_fetcher import ContractDecompilerTool, ContractFetcher
 
 def run_transaction_analysis(tx_hash, tx_dir, chain_id):
-    """Run comprehensive transaction analysis (analyze.py functionality)"""
-
-    # === Configurations ===
     api_key = os.environ.get("TRANSPOSE_API_KEY")
     if not api_key:
         raise ValueError("TRANSPOSE_API_KEY environment variable is required")

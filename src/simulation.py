@@ -178,7 +178,6 @@ def extract_and_save_addresses(result: dict, output_dir: str):
     # Get contract_ids from transaction
     contract_ids = result.get('transaction', {}).get('contract_ids', [])
     
-    # Extract addresses (after last ':')
     addresses = []
     if contract_ids:
         for contract_id in contract_ids:

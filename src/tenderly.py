@@ -2,7 +2,6 @@ import json
 import requests
 from web3 import Web3
 
-
 class TenderlySimulator:
     def __init__(self, api_key, account_id, project_slug):
         """
