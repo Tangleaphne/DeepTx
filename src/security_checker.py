@@ -214,6 +214,7 @@ def analyze_transaction_output(tx_hash: str, tx_dir:str):
     report = {
         'transaction_hash': tx_hash,
         'timestamp': datetime.now().isoformat(),
+        'disclaimer': 'IMPORTANT: No detection of malicious addresses/patterns/links does not guarantee absolute safety. This tool only performs detection based on known databases and limited rules, and cannot guarantee 100% coverage of all risks. Please combine with other security tools and manual analysis for comprehensive judgment.',
         'summary': {
             'total_addresses': len(addresses),
             'malicious_addresses': len(malicious_addrs),

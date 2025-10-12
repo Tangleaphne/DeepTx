@@ -1,7 +1,7 @@
 {
   "transaction_info": {
     "directory": "output/1/0x154d21b78f95a942443ed86d4b6368b07f62eae04adb850d4390e4f8362f7e5b",
-    "analysis_timestamp": "2025-10-11 12:37:35",
+    "analysis_timestamp": "2025-10-12 12:20:37",
     "models_tested": [
       "gpt-4o-mini",
       "gpt-3.5-turbo",

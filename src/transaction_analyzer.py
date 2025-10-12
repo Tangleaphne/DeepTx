@@ -328,6 +328,8 @@ def run_transaction_analysis(tx_hash, tx_dir, chain_id):
     def extract_state_diffs(trace_item):
         if "action" in trace_item:
             contract_address = trace_item["action"].get("to", "").lower()
+            if not contract_address: 
+                contract_address = trace_item["action"].get("from", "").lower()
             if "diff" in trace_item and isinstance(trace_item["diff"], list):
                 for change in trace_item["diff"]:
                     key = change.get("key")
