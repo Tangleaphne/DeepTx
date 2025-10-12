@@ -13,7 +13,6 @@ import pandas as pd
 from pathlib import Path
 from collections import defaultdict
 from web3 import Web3
-from datetime import datetime
 
 # Import modules
 from .heimdall_client import inspect_transaction

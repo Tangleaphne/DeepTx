@@ -8,7 +8,7 @@ import os
 import json
 import re
 import pandas as pd
-from typing import List, Dict, Set, Optional
+from typing import List, Dict, Set
 from datetime import datetime
 
 class MaliciousChecker:

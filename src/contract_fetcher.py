@@ -1,6 +1,5 @@
 import os
 import requests
-from datetime import datetime
 import json
 import time
 from .heimdall_client import decompile_bytecode

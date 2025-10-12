@@ -9,7 +9,6 @@ import os
 import sys
 import json
 import time
-import subprocess
 import pandas as pd
 import requests
 from typing import Dict, Any, List
@@ -69,6 +68,7 @@ from src.transaction_analyzer import run_transaction_analysis as run_transaction
 from src.security_checker import analyze_transaction_output
 from src.llm_analyzer import run_multi_model_analysis
 from src.consensus_engine import ConsensusChecker
+from src.simulation import main as simulation_main
 
 
 def print_step_header(step_num: int, total_steps: int, title: str):
@@ -240,24 +240,6 @@ def run_llm_analysis(tx_hash: str, tx_dir: str) -> Dict[str, Any]:
         return {}
 
 
-# def analyze_transaction_type(tx_dir: str) -> str:
-#     """Analyze transaction type"""
-#     try:
-#         # This can be enhanced to determine type based on transaction data
-#         call_trace_path = os.path.join(tx_dir, "call_trace.csv")
-#         df_call_trace = pd.read_csv(call_trace_path)
-#         if df_call_trace.empty:
-#             return "User Transfer"    
-#         has_contract_calls = any(df_call_trace['depth'] > 0)
-#         has_function_calls = any(df_call_trace['function'].notna() & (df_call_trace['function'] != ""))    
-#         if has_contract_calls or has_function_calls:
-#             return "Smart Contract Interaction"
-#         else:
-#             return "User Transfer"
-            
-#     except Exception as e:
-#         print(f"Error analyzing transaction type: {e}")
-#         return "Unknown"
 def analyze_transaction_type(tx_dir: str) -> str:
     """Analyze transaction type with detailed contract creation detection"""
     try:
@@ -465,8 +447,7 @@ def simulation():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(add_help=False)
-    parser.add_argument("-s", "--simulation", type=_parse_bool_flag, default=False,
-                        help="Set to 1/true to run simulation(); 0/false (default) runs main().")
+    parser.add_argument( "-s", "--simulation", type=_parse_bool_flag, default=False, help="1/true: run simulation() — simulate execution then analyze; 0/false: run main() — analyze a real on-chain transaction." )
     known, remaining = parser.parse_known_args()
     if known.simulation:
         simulation()

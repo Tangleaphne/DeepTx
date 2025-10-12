@@ -1,12 +1,4 @@
 #!/usr/bin/env python3
-"""
-Multi-Model Security Analysis Script
-====================================
-
-This script runs security analysis on a transaction using three different models
-and generates separate reports for each model in the transaction directory.
-"""
-
 import os
 import json
 import time

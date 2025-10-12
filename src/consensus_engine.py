@@ -1,12 +1,4 @@
 #!/usr/bin/env python3
-"""
-Consensus Checker with Self-Reflection and Weighted Voting
-==========================================================
-
-This module implements the consensus refinement process for multi-model security analysis.
-It includes self-reflection mechanisms and weighted voting as fallback.
-"""
-
 import json
 import time
 from typing import List, Dict, Any, Tuple
