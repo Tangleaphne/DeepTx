@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import json
 import os
 import hashlib
@@ -51,7 +52,7 @@ class TenderlySimulator:
         block_number=None,
     ):
         """
-        Simulate Ethereum transaction and return raw response
+        Simulate transaction and return raw response
 
         Args:
         from_address: Sender address
@@ -88,7 +89,6 @@ class TenderlySimulator:
             self.base_url, headers=self.headers, json=simulation_body
         )
         
-        # Check for errors and provide better error messages
         if response.status_code != 200:
             error_msg = f"Tenderly API error: {response.status_code}"
             try:
@@ -98,7 +98,6 @@ class TenderlySimulator:
                 error_msg += f"\nResponse: {response.text}"
             raise Exception(error_msg)
         
-        # Return raw response directly
         data = response.json()
         if self.cache_dir:
             logger.info(f"Cache query result to {query_cache_file_path}")

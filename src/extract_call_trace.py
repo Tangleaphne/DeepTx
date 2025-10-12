@@ -1,5 +1,5 @@
+#!/usr/bin/env python3
 from typing import List, Dict
-
 
 def extract_call_trace_recursive(call_trace: dict, depth: int = 0, traces: List[Dict] = None) -> List[Dict]:
     """

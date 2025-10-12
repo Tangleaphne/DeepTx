@@ -1,5 +1,5 @@
+#!/usr/bin/env python3
 from typing import List, Dict
-
 
 def extract_transfer_events(result: dict) -> List[Dict]:
     """

@@ -1,14 +1,12 @@
-# ui_reconstruction_directory.py
-
+#!/usr/bin/env python3
 import os
 import sys
 import json
 from openai import OpenAI
 
-# Initialize the Bianxie-compatible client
 client = OpenAI(
     api_key="",
-    base_url="https://api.bianxie.ai/v1"   
+    base_url="https://api.openai.com/v1"   
 )
 
 def ui_reconstruction(trace_text: str, html_code: str, js_code: str) -> list:

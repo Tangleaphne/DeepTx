@@ -1,9 +1,4 @@
 #!/usr/bin/env python3
-"""
-Enhanced Multi-Modal Transaction Analysis with User-Friendly Output
-Uses smart token limits and provides simplified security assessment
-"""
-
 import os
 import json
 import re
@@ -658,53 +653,5 @@ Risk level definitions:
     
     return user_friendly_result
 
-def main():
-    """Main function"""
-    # Example usage with a transaction directory
-    tx_dir = "output/1/0xff8e9226091d513fc936ecc670030eba03f34dbe60cd012122bd18be44248d32"
-    
-    if os.path.exists(tx_dir):
-        print("Starting enhanced analysis with user-friendly output...")
-        
-        # Process transaction data
-        data = process_transaction_data(tx_dir)
-        
-        # Perform enhanced analysis
-        result = enhanced_feature_analysis(data, "gpt-4o-mini")
-        
-        # Save results
-        output_path = os.path.join(tx_dir, "enhanced_analysis_user_friendly.json")
-        with open(output_path, 'w', encoding='utf-8') as f:
-            json.dump(result, f, indent=2, ensure_ascii=False)
-        
-        print(f"\n=== COMPREHENSIVE SECURITY ASSESSMENT ===")
-        print(f"Risk Level: {result['risk_level'].upper()}")
-        print(f"Overall Confidence: {result['confidence_score']}%")
-        print(f"Transaction Explanation: {result['explanation']}")
-        
-        print(f"\nCategory Analysis:")
-        categories = result.get('category_analysis', {})
-        print(f"  Behavior Score: {categories.get('behavior_score', 0)}%")
-        print(f"  Context Score: {categories.get('context_score', 0)}%")
-        print(f"  UI Score: {categories.get('ui_score', 0)}%")
-        
-        # Show malicious DB score only if database has meaningful data
-        if data["malicious_database_report"].get("has_meaningful_data", False):
-            print(f"  Malicious DB Score: {categories.get('malicious_db_score', 0)}%")
-        else:
-            print(f"  Malicious DB Score: Excluded (no meaningful data)")
-        
-        print(f"\nScoring Criteria:")
-        print(f"  {result['custom_scoring_criteria']}")
-        
-        print(f"\nRecommendations:")
-        for i, rec in enumerate(result['recommendations'], 1):
-            print(f"  {i}. {rec}")
-        
-        print(f"\nAnalysis completed and saved to: {output_path}")
-        
-    else:
-        print(f"Transaction directory not found: {tx_dir}")
 
-if __name__ == "__main__":
-    main() 
+# root cause: 1. process_transaction_data 2. enhanced_feature_analysis 

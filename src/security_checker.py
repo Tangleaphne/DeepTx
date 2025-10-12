@@ -1,13 +1,7 @@
 #!/usr/bin/env python3
-"""
-Malicious database query and fraud pattern detection script
-Analyzes transaction output data in output/1/[tx_hash]/ directory
-"""
-
 import os
 import json
 import re
-import pandas as pd
 from typing import List, Dict, Set
 from datetime import datetime
 
@@ -118,8 +112,6 @@ class MaliciousChecker:
 def analyze_transaction_output(tx_hash: str, tx_dir:str):
     """Analyze transaction output data"""
     
-    # Set paths
-    # output_dir = f"output/1/{tx_hash.lower()}"
     output_dir = tx_dir
     
     if not os.path.exists(output_dir):
@@ -297,22 +289,3 @@ def print_security_report(report: Dict):
                 print(f"    {match}")
     
     print(f"="*50)
-
-
-if __name__ == "__main__":
-    import sys
-    
-    # Usage example
-    if len(sys.argv) != 2:
-        print("Usage:")
-        print("  python test_query.py <tx_hash>")
-        print("\nExample:")
-        print("  python test_query.py 0xff8e9226091d513fc936ecc670030eba03f34dbe60cd012122bd18be44248d32")
-        print("\nOptional files (place in output/1/[tx_hash]/ directory):")
-        print("  url.txt  - One URL per line for domain checking")
-        print("  js.txt   - JavaScript code for pattern analysis")
-        sys.exit(1)
-    
-    tx_hash = sys.argv[1]
-    
-    analyze_transaction_output(tx_hash) 

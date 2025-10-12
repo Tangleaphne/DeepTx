@@ -1,11 +1,12 @@
+#!/usr/bin/env python3
 import json
 import os
 import sys
-from tenderly import TenderlySimulator, get_transaction_params_by_hash
-from extract_asset_flows import extract_asset_changes, extract_transfer_events, extract_eth_transfers
-from extract_call_trace import extract_all_call_traces
+from .tenderly import TenderlySimulator, get_transaction_params_by_hash
+from .extract_asset_flows import extract_asset_changes, extract_transfer_events, extract_eth_transfers
+from .extract_call_trace import extract_all_call_traces
 import csv
-from typing import List, Dict
+from typing import List
 
 # Tenderly API configuration
 api_key = os.environ.get("api_key")
@@ -208,7 +209,7 @@ def extract_and_save_addresses(result: dict, output_dir: str):
             f.write(f"{address}\n")
 
 
-def main():
+def simulation():
     """Main function"""
     
     if len(sys.argv) < 2:
@@ -312,8 +313,3 @@ def main():
     # Final output: id/tx and status
     print(f"\n{output_dir}")
     print(f"{'Success' if status else 'Failed'}")
-
-
-if __name__ == "__main__":
-    main()
-

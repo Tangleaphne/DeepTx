@@ -1,18 +1,16 @@
+#!/usr/bin/env python3
 import subprocess
 import logging
 import os
 import sys
 
-# Setup logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
-
 
 def run_heimdall(command, rpc_url=None, tx_hash=None, tx_dir=None):
     """Run a heimdall command with optional RPC URL and selectively save trace output."""
     if rpc_url:
         command += ['--rpc-url', rpc_url]
 
-    # logging.info(f"Running: heimdall {' '.join(command)}")
     result = subprocess.run(
         ['heimdall'] + command + ['-q'],
         stdout=subprocess.PIPE,
@@ -31,7 +29,6 @@ def run_heimdall(command, rpc_url=None, tx_hash=None, tx_dir=None):
         out_dir = tx_dir
         os.makedirs(out_dir, exist_ok=True)
 
-        # Filter stdout from the first appearance of 'heimdall::inspect('
         filtered_output = ""
         found = False
         for line in stdout.splitlines():
@@ -43,11 +40,6 @@ def run_heimdall(command, rpc_url=None, tx_hash=None, tx_dir=None):
         if not found:
             logging.warning("Could not find 'heimdall::inspect(' in stdout, saving full stdout instead.")
             filtered_output = stdout
-
-        # trace_path = os.path.join(out_dir, "trace.txt")
-        # with open(trace_path, "w", encoding="utf-8") as f:
-        #     f.write(filtered_output)
-        # logging.info(f"[+] Saved raw trace output to {trace_path}")
 
     return stdout
 
@@ -79,11 +71,3 @@ def inspect_transaction(tx_hash, api_key=None, rpc_url=None, tx_dir=None):
     if not output:
         logging.error(f"Failed to inspect transaction {tx_hash}")
         return None
-    # tx_dir = os.path.join("output", "1", tx_hash.lower())
-    # os.makedirs(tx_dir, exist_ok=True)
-    # trace_txt_path = os.path.join(tx_dir, "trace.txt")
-
-    # with open(trace_txt_path, "w", encoding="utf-8") as f:
-    #     f.write(output)
-
-    # print(f"[+] Saved raw trace output to {trace_txt_path}")

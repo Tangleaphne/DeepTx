@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import os
 import requests
 import json
@@ -152,15 +153,4 @@ class ContractDecompilerTool:
             print(result)
             return None
 
-
-if __name__ == "__main__":
-    import sys
-
-    if len(sys.argv) != 2:
-        print("Usage: python3 getcode.py <contract_address>")
-        sys.exit(1)
-
-    address = sys.argv[1]
-    fetcher = ContractFetcher()
-    tool = ContractDecompilerTool(fetcher)
-    tool.run(address)
+# root cause: ContractDecompilerTool(ContractFetcher())

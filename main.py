@@ -68,7 +68,7 @@ from src.transaction_analyzer import run_transaction_analysis as run_transaction
 from src.security_checker import analyze_transaction_output
 from src.llm_analyzer import run_multi_model_analysis
 from src.consensus_engine import ConsensusChecker
-from src.simulation import main as simulation_main
+from src.simulation import simulation
 
 
 def print_step_header(step_num: int, total_steps: int, title: str):
@@ -440,10 +440,6 @@ def real():
     print(f"\nAnalysis completed successfully!")
     print(f"End time: {time.strftime('%Y-%m-%d %H:%M:%S')}")
     print(f"Results saved in: output/1/{tx_hash.lower()}/")
-
-
-def simulation():
-    print("TBD")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(add_help=False)

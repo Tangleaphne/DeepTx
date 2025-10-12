@@ -1,14 +1,8 @@
 #!/usr/bin/env python3
-"""
-Comprehensive Ethereum Transaction Analysis Tool
-Combines transaction analysis and security checking in one workflow
-"""
-
 import os
 import json
 import re
 import time
-import requests
 import pandas as pd
 from pathlib import Path
 from collections import defaultdict
@@ -321,7 +315,7 @@ def run_transaction_analysis(tx_hash, tx_dir, chain_id):
         df_assets = df_assets[["token_address", "name", "symbol", "from", "to", "value"]]
         df_assets.to_csv(ASSET_FLOWS_PATH, index=False)
 
-    # === Step 9: State Changes Analysis ===
+    # === Step 8: State Changes Analysis ===
     state_changes = defaultdict(list)
 
     def extract_state_diffs(trace_item):
@@ -427,57 +421,4 @@ def ask_for_optional_files(tx_hash, tx_dir):
         elif add_js in ['n', 'no', '']:
             break
 
-
-def run_security_analysis(tx_hash, tx_dir):
-    """Run security analysis (test_query.py functionality)"""
-    
-    print(f"\n[3/3] SECURITY ANALYSIS")
-    print(f"="*50)
-    
-    from .security_checker import analyze_transaction_output
-    analyze_transaction_output(tx_hash, tx_dir)
-
-
-def main():
-    """Main execution flow"""
-    
-    print("COMPREHENSIVE ETHEREUM TRANSACTION ANALYSIS")
-    print("="*50)
-    
-    if len(os.sys.argv) != 2:
-        print("Usage:")
-        print("  python main.py <tx_hash>")
-        print("\nExample:")
-        print("  python main.py 0xff8e9226091d513fc936ecc670030eba03f34dbe60cd012122bd18be44248d32")
-        return
-    
-    tx_hash = os.sys.argv[1]
-    tx_dir = os.path.join("output", "chain_id", tx_hash.lower())
-    
-    try:
-        # Step 1: Run transaction analysis
-        success = run_transaction_analysis(tx_hash, tx_dir, chain_id=1)
-        if not success:
-            print("Transaction analysis failed")
-            return
-        
-        # Step 2: Ask for optional files
-        ask_for_optional_files(tx_hash, tx_dir)
-        print(f"Asked for optional files...")
-        
-        # Step 3: Run security analysis
-        run_security_analysis(tx_hash, tx_dir)
-        
-        print(f"\n" + "="*50)
-        print("ANALYSIS COMPLETE")
-        print(f"Output directory: {tx_dir}")
-        print("="*50)
-        
-    except KeyboardInterrupt:
-        print("\nAnalysis interrupted by user")
-    except Exception as e:
-        print(f"Error during analysis: {e}")
-
-
-if __name__ == "__main__":
-    main() 
+# root cuase: 1.run_transaction_analysis 2. ask_for_optional_files 3. security_checker.analyze_transaction_output 
