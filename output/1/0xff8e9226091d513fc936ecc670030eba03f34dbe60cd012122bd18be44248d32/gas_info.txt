@@ -1,2 +1,0 @@
-tx_gas_price: 2400206633
-block_base_fee: 2400206633
