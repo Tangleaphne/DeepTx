@@ -1,34 +1,10 @@
-#!/usr/bin/env python3
 import json
-import os
-import hashlib
-import logging
 import requests
 from web3 import Web3
 
 
-logger = logging.getLogger(__name__)
-
-
-def generate_query_hash(**kwargs) -> str:
-    """
-    Generate query hash for caching
-
-    Args:
-    **kwargs: Key-value pairs to include in hash calculation
-
-    Returns:
-    str: Query hash value
-    """
-    # Sort by keys to ensure same parameters generate same hash
-    sorted_items = sorted(kwargs.items())
-    # Convert parameters to string and concatenate
-    param_str = "-".join([f"{k}:{v}" for k, v in sorted_items])
-    return hashlib.sha256(param_str.encode()).hexdigest()
-
-
 class TenderlySimulator:
-    def __init__(self, api_key, account_id, project_slug, cache_dir: str = None):
+    def __init__(self, api_key, account_id, project_slug):
         """
         Args:
         api_key: Tenderly API key
@@ -38,9 +14,6 @@ class TenderlySimulator:
         self.api_key = api_key
         self.base_url = f"https://api.tenderly.co/api/v1/account/{account_id}/project/{project_slug}/simulate"
         self.headers = {"X-Access-Key": api_key, "Content-Type": "application/json"}
-        self.cache_dir = cache_dir
-        if self.cache_dir and not os.path.exists(self.cache_dir):
-            os.makedirs(self.cache_dir)
 
     def simulate_transaction(
         self,
@@ -75,16 +48,6 @@ class TenderlySimulator:
             "save": False,
         }
 
-        # Generate query hash
-        query_hash = generate_query_hash(
-            **{k: v for k, v in simulation_body.items() if v is not None}
-        )
-
-        query_cache_file_path = os.path.join(self.cache_dir or "", f"{query_hash}.json")
-        if self.cache_dir and os.path.exists(query_cache_file_path):
-            with open(query_cache_file_path, "r", encoding="utf-8") as f:
-                return json.load(f)
-
         response = requests.post(
             self.base_url, headers=self.headers, json=simulation_body
         )
@@ -98,12 +61,7 @@ class TenderlySimulator:
                 error_msg += f"\nResponse: {response.text}"
             raise Exception(error_msg)
         
-        data = response.json()
-        if self.cache_dir:
-            logger.info(f"Cache query result to {query_cache_file_path}")
-            with open(query_cache_file_path, "w", encoding="utf-8") as f:
-                json.dump(data, f)
-        return data
+        return response.json()
 
 
 def get_transaction_params_by_hash(rpc_url: str, tx_hash):

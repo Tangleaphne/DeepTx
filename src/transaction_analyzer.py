@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import os
 import json
 import re
@@ -8,7 +7,6 @@ from pathlib import Path
 from collections import defaultdict
 from web3 import Web3
 
-# Import modules
 from .heimdall_client import inspect_transaction
 from .contract_fetcher import ContractDecompilerTool, ContractFetcher
 

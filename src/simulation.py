@@ -1,10 +1,8 @@
-#!/usr/bin/env python3
 import json
 import os
 import sys
 from .tenderly import TenderlySimulator, get_transaction_params_by_hash
-from .extract_asset_flows import extract_asset_changes, extract_transfer_events, extract_eth_transfers
-from .extract_call_trace import extract_all_call_traces
+from .utils import extract_all_call_traces, extract_asset_changes, extract_transfer_events, extract_eth_transfers
 import csv
 from typing import List
 
@@ -32,21 +30,19 @@ def simulate_transaction(
     """
     from web3 import Web3
     
-    # Initialize simulator (without cache to avoid conflicts)
+
     simulator = TenderlySimulator(
         api_key=api_key,
         account_id=account_id,
-        project_slug=project_slug,
-        cache_dir=None  # Disable cache
+        project_slug=project_slug
     )
     
-    # Get transaction parameters from hash if provided
+
     if tx_hash and rpc_url:
         tx_params = get_transaction_params_by_hash(rpc_url, tx_hash)
         result = simulator.simulate_transaction(**tx_params)
         simulation_id = tx_hash
     else:
-        # Encode function call if provided
         if function_signature and params is not None:
             w3 = Web3()
             function_selector = w3.keccak(text=function_signature)[:4].hex()
@@ -60,7 +56,6 @@ def simulate_transaction(
         else:
             input_data = "0x"
         
-        # Simulate
         result = simulator.simulate_transaction(
             network_id=network_id,
             from_address=from_address,
@@ -70,17 +65,13 @@ def simulate_transaction(
             block_number=block_number
         )
         
-        # Use transaction hash from result as ID
         simulation_id = result.get('transaction', {}).get('hash', 'unknown')
     
-    # Get chain ID from result
     chain_id = result.get('transaction', {}).get('network_id', '1')
     
-    # Create output directory: output/[chain_id]/[tx_hash]/
     output_dir = os.path.join('output', str(chain_id), simulation_id)
     os.makedirs(output_dir, exist_ok=True)
     
-    # Save decoded_trace.json
     trace_file = os.path.join(output_dir, 'decoded_trace.json')
     with open(trace_file, 'w', encoding='utf-8') as f:
         json.dump(result, f, indent=2)
@@ -90,12 +81,10 @@ def simulate_transaction(
 
 def extract_and_save_asset_flows(result: dict, output_dir: str):
     """Extract asset flows and save to CSV (silent)"""
-    # Extract from multiple sources
     asset_transfers = extract_asset_changes(result)
     token_transfers = extract_transfer_events(result)
     eth_transfers = extract_eth_transfers(result)
     
-    # Combine and deduplicate
     all_transfers = asset_transfers + token_transfers + eth_transfers
     seen = set()
     unique_transfers = []
@@ -105,7 +94,6 @@ def extract_and_save_asset_flows(result: dict, output_dir: str):
             seen.add(key)
             unique_transfers.append(transfer)
     
-    # Always save to CSV (even if empty)
     output_file = os.path.join(output_dir, 'asset_flows.csv')
     fieldnames = ['token_address', 'name', 'symbol', 'from', 'to', 'value']
     
@@ -122,7 +110,6 @@ def extract_and_save_call_trace(result: dict, output_dir: str):
     exclude_types = ['JUMPDEST', 'STATICCALL']
     traces = extract_all_call_traces(result, exclude_types=exclude_types)
     
-    # Always save to CSV (even if empty)
     output_file = os.path.join(output_dir, 'call_trace.csv')
     fieldnames = ['depth', 'from', 'to', 'call_type', 'function']
     
@@ -176,7 +163,6 @@ def extract_and_save_state_changes(result: dict, output_dir: str):
                             'New Value': simplify_hex(new_value)
                         })
     
-    # Always save to CSV (even if empty)
     output_file = os.path.join(output_dir, 'state_changes.csv')
     fieldnames = ['Contract', 'Storage Slot', 'New Value']
     

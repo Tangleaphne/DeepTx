@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import json
 import time
 from typing import List, Dict, Any, Tuple

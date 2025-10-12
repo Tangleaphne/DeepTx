@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import os
 import json
 import re
@@ -7,7 +6,6 @@ from typing import Dict, Any, List
 from openai import OpenAI
 import os
 
-# Validate API key
 api_key = os.environ.get("OPENAI_API_KEY")
 if not api_key:
     raise ValueError("OPENAI_API_KEY environment variable is required")
@@ -18,7 +16,6 @@ client = OpenAI(
 )
 
 def load_json(path: str) -> Dict[str, Any]:
-    """Load JSON file"""
     try:
         with open(path, 'r', encoding='utf-8') as f:
             return json.load(f)
