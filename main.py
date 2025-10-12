@@ -14,8 +14,18 @@ import pandas as pd
 import requests
 from typing import Dict, Any, List
 from dotenv import load_dotenv, find_dotenv
+import argparse
+
 
 load_dotenv(find_dotenv(filename=".env", usecwd=True), override=False)
+
+def _parse_bool_flag(s: str) -> bool:
+    t = str(s).strip().lower()
+    if t in {"1", "true", "yes", "y", "on"}:
+        return True
+    if t in {"0", "false", "no", "n", "off"}:
+        return False
+    raise argparse.ArgumentTypeError(f"Invalid boolean value for --simulation: {s}")
 
 def check_dependencies():
     """Check if required dependencies are installed"""
@@ -451,4 +461,11 @@ def main():
 
 
 if __name__ == "__main__":
-    main() 
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument("-s", "--simulation", type=_parse_bool_flag, default=False,
+                        help="Set to 1/true to run simulation(); 0/false (default) runs main().")
+    known, remaining = parser.parse_known_args()
+    if known.simulation:
+        print("simulation")
+    else:
+        main() 
