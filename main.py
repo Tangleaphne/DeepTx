@@ -408,7 +408,7 @@ def get_chain_id(rpc_url: str) -> str:
         raise RuntimeError(f"Error fetching chain_id: {response.status_code} {response.text}")
 
 
-def main():
+def real():
     """Main function"""
     if len(sys.argv) != 2:
         print("Usage: python3 main.py <transaction_hash>")
@@ -460,12 +460,15 @@ def main():
     print(f"Results saved in: output/1/{tx_hash.lower()}/")
 
 
+def simulation():
+    print("TBD")
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(add_help=False)
     parser.add_argument("-s", "--simulation", type=_parse_bool_flag, default=False,
                         help="Set to 1/true to run simulation(); 0/false (default) runs main().")
     known, remaining = parser.parse_known_args()
     if known.simulation:
-        print("simulation")
+        simulation()
     else:
-        main() 
+        real() 
